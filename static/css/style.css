@@ -23,6 +23,8 @@ body {
     overflow-x: hidden;
 }
 
+/* PARTICLES */
+
 .particles {
     position: fixed;
     inset: 0;
@@ -49,15 +51,19 @@ body {
     }
 }
 
+/* HEADER AND NAVBAR */
+
 header {
     position: relative;
-    z-index: 2;
+    z-index: 10;
     padding: 25px 8%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
     border-bottom: 1px solid #b38b3540;
-    background: #080806c9;
+    background: #080806;
 }
 
 header h2 {
@@ -65,13 +71,33 @@ header h2 {
     color: var(--light-gold);
     letter-spacing: 4px;
     text-shadow: 0 0 15px #d6ad5270;
+    white-space: nowrap;
 }
 
-.status {
-    color: #d6ad52;
-    font-size: 11px;
-    letter-spacing: 2px;
+header nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
 }
+
+header nav a {
+    color: var(--gold);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    transition: .3s ease;
+}
+
+header nav a:hover {
+    color: var(--light-gold);
+    text-shadow: 0 0 12px var(--gold);
+}
+
+/* MAIN */
 
 main {
     position: relative;
@@ -80,6 +106,8 @@ main {
     width: 90%;
     margin: auto;
 }
+
+/* HERO */
 
 .hero {
     text-align: center;
@@ -94,8 +122,12 @@ main {
 }
 
 @keyframes spy {
-    0%, 100% { transform: translateY(0) rotate(-5deg); }
-    50% { transform: translateY(-18px) rotate(5deg); }
+    0%, 100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+    50% {
+        transform: translateY(-18px) rotate(5deg);
+    }
 }
 
 .eyebrow {
@@ -120,6 +152,8 @@ main {
     color: #aaa08c;
     line-height: 1.8;
 }
+
+/* INVESTIGATION FORM */
 
 .investigation {
     background: linear-gradient(145deg, #1c190f, #0e0d09);
@@ -150,7 +184,8 @@ label {
     margin: 22px 0 10px;
 }
 
-textarea, input {
+textarea,
+input {
     width: 100%;
     padding: 15px;
     background: #080806;
@@ -167,10 +202,13 @@ textarea {
     resize: vertical;
 }
 
-textarea:focus, input:focus {
+textarea:focus,
+input:focus {
     border-color: var(--light-gold);
     box-shadow: 0 0 12px #d6ad5230;
 }
+
+/* BUTTONS */
 
 button {
     padding: 13px 20px;
@@ -202,11 +240,18 @@ button:hover {
     font-size: 14px;
 }
 
+#investigate:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
 #status {
     color: var(--gold);
     margin-top: 18px;
     font-size: 13px;
 }
+
+/* REPORT */
 
 #results {
     margin-bottom: 60px;
@@ -245,9 +290,14 @@ button:hover {
 
 .report-card a {
     color: var(--light-gold);
+    overflow-wrap: anywhere;
 }
 
+/* FOOTER */
+
 footer {
+    position: relative;
+    z-index: 1;
     text-align: center;
     padding: 25px;
     color: #927b4c;
@@ -256,11 +306,22 @@ footer {
     border-top: 1px solid #b38b3530;
 }
 
-@media(max-width:600px) {
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
     header {
         padding: 20px 5%;
         flex-direction: column;
-        gap: 12px;
+        justify-content: center;
+        gap: 18px;
+    }
+
+    header nav {
+        gap: 15px;
+    }
+
+    header nav a {
+        font-size: 11px;
     }
 
     .hero {
@@ -273,5 +334,16 @@ footer {
 
     .status {
         font-size: 9px;
+    }
+}
+
+@media (max-width: 400px) {
+    header nav {
+        gap: 12px;
+    }
+
+    header nav a {
+        font-size: 10px;
+        letter-spacing: 1px;
     }
 }
