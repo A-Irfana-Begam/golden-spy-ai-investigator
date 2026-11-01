@@ -1,37 +1,72 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
+import ipaddress
+import socket
+
 
 def fetch_sources(urls):
-    fetched = []
+    results = []
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0"
     }
 
     for url in urls:
         try:
-            response = requests.get(url, headers=headers, timeout=10)
+            parsed = urlparse(url)
+
+            if parsed.scheme not in ("http", "https"):
+                raise ValueError("Invalid URL scheme")
+
+            host = parsed.hostname
+
+            if not host:
+                raise ValueError("Invalid hostname")
+
+            addresses = socket.getaddrinfo(host, None)
+
+            for address in addresses:
+                ip = ipaddress.ip_address(address[4][0])
+                if not ip.is_global:
+                    raise ValueError("Private addresses are not allowed")
+
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=10,
+                allow_redirects=False
+            )
             response.raise_for_status()
 
             soup = BeautifulSoup(response.text, "html.parser")
 
-            for script in soup(["script", "style", "nav", "footer", "header"]):
-                script.decompose()
+            for tag in soup([
+                "script", "style", "nav",
+                "footer", "header", "noscript"
+            ]):
+                tag.decompose()
 
-            title = soup.title.string.strip() if soup.title and soup.title.string else url
+            title = (
+                soup.title.get_text(strip=True)
+                if soup.title else url
+            )
+
             text = " ".join(soup.stripped_strings)
 
-            fetched.append({
+            results.append({
                 "url": url,
                 "title": title,
                 "status": "success",
-                "text": text
+                "text": text[:20000]
             })
-        except Exception as e:
-            fetched.append({
+
+        except Exception as error:
+            results.append({
                 "url": url,
                 "title": url,
                 "status": "error",
-                "error": str(e)
+                "error": str(error)
             })
 
-    return fetched
+    return results
