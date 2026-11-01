@@ -16,6 +16,7 @@ const urlList = document.getElementById("url-list");
 const addSourceButton = document.getElementById("add-source");
 const investigateButton = document.getElementById("investigate");
 
+
 if (addSourceButton && urlList) {
     addSourceButton.onclick = () => {
         if (urlList.children.length >= 8) {
@@ -31,6 +32,7 @@ if (addSourceButton && urlList) {
         urlList.appendChild(input);
     };
 }
+
 
 function createCard(title, items) {
     const card = document.createElement("div");
@@ -112,6 +114,7 @@ function createCard(title, items) {
     return card;
 }
 
+
 if (investigateButton) {
     investigateButton.onclick = async () => {
         const question = document.getElementById("question").value.trim();
@@ -126,8 +129,8 @@ if (investigateButton) {
         const results = document.getElementById("results");
         const report = document.getElementById("report");
 
-        if (!question || !urls.length) {
-            status.textContent = "Enter a question and at least one URL.";
+        if (!question) {
+            status.textContent = "Enter a research question.";
             return;
         }
 
@@ -137,7 +140,7 @@ if (investigateButton) {
         }
 
         investigateButton.disabled = true;
-        status.textContent = "⏳ Gemini AI is investigating...";
+        status.textContent = "⏳ Discovering sources and investigating...";
         results.hidden = true;
         report.replaceChildren();
 
@@ -156,7 +159,9 @@ if (investigateButton) {
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(data.error || "Investigation failed.");
+                throw new Error(
+                    data.error || "Investigation failed."
+                );
             }
 
             const analysis = data.analysis || {};
@@ -221,7 +226,7 @@ if (investigateButton) {
             }));
 
             report.appendChild(
-                createCard("SOURCE STATUS", sourceStatus)
+                createCard("DISCOVERED SOURCE STATUS", sourceStatus)
             );
 
             report.appendChild(
