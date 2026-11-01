@@ -167,7 +167,7 @@ if (investigateButton) {
 
             report.appendChild(
                 createCard(
-                    "VERIFIED INFORMATION",
+                    "SOURCE-SUPPORTED INFORMATION",
                     analysis.verified_information
                 )
             );
