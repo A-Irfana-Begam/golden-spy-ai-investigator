@@ -36,16 +36,24 @@ def health():
 @app.route("/api/investigate", methods=["POST"])
 def run_investigation():
     try:
-        data = request.get_json(silent=True) or {}
+        data = request.get_json(silent=True)
 
-        question = data.get("question", "").strip()
+        if not isinstance(data, dict):
+            return jsonify({
+                "success": False,
+                "error": "Invalid request. Please try again."
+            }), 400
+
+        question = data.get("question", "")
         user_urls = data.get("urls", [])
 
-        if not question:
+        if not isinstance(question, str) or not question.strip():
             return jsonify({
                 "success": False,
                 "error": "Enter a research question."
             }), 400
+
+        question = question.strip()
 
         if not isinstance(user_urls, list):
             return jsonify({
@@ -65,12 +73,22 @@ def run_investigation():
                 "error": "Maximum 8 URLs are allowed."
             }), 400
 
-        # User-provided URLs get priority.
-        # Discover additional sources for the same question.
-        discovered_urls = discover_sources(
-            question,
-            limit=max(0, 8 - len(user_urls))
-        )
+        discovered_urls = []
+
+        try:
+            remaining = 8 - len(user_urls)
+
+            if remaining > 0:
+                discovered_urls = discover_sources(
+                    question,
+                    limit=remaining
+                ) or []
+
+        except Exception:
+            app.logger.warning(
+                "Automatic source discovery failed.",
+                exc_info=True
+            )
 
         combined_urls = list(dict.fromkeys(
             user_urls + discovered_urls
@@ -79,7 +97,10 @@ def run_investigation():
         if not combined_urls:
             return jsonify({
                 "success": False,
-                "error": "No sources found. Try adding a webpage URL."
+                "error": (
+                    "No sources found. Please try again "
+                    "or provide webpage URLs."
+                )
             }), 400
 
         sources = fetch_sources(combined_urls)
@@ -87,7 +108,8 @@ def run_investigation():
         usable_sources = [
             source for source in sources
             if source.get("status") == "success"
-            and source.get("text", "").strip()
+            and isinstance(source.get("text"), str)
+            and source.get("text").strip()
         ]
 
         if not usable_sources:
@@ -97,26 +119,39 @@ def run_investigation():
                 "sources": sources
             }), 400
 
-        analysis = analyze_sources(question, sources)
+        analysis = analyze_sources(question, usable_sources)
 
         return jsonify({
             "success": True,
             "question": question,
             "sources": sources,
             "analysis": analysis,
-            "analysis_mode": "Gemini AI + Automatic Source Discovery + Evidence Analysis",
+            "analysis_mode": (
+                "Gemini AI + Automatic Source Discovery + Evidence Analysis"
+                if discovered_urls
+                else "Gemini AI + Evidence Analysis"
+            ),
             "disclaimer": (
                 "AI-generated findings require manual verification. "
                 "Check original sources before relying on claims."
             )
         })
 
-    except Exception as error:
+    except ValueError as error:
+        return jsonify({
+            "success": False,
+            "error": str(error)
+        }), 400
+
+    except Exception:
         app.logger.exception("Investigation failed")
 
         return jsonify({
             "success": False,
-            "error": str(error) or "Investigation failed. Please try again."
+            "error": (
+                "Investigation could not be completed. "
+                "Please try again later."
+            )
         }), 500
 
 
