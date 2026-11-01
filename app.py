@@ -1,8 +1,7 @@
 
 from flask import Flask, render_template, request, jsonify
-from urllib.parse import urlparse
 
-from services.source_fetcher import fetch_sources
+from services.source_fetcher import fetch_sources, discover_sources
 from services.ai_analyzer import analyze_sources
 
 
@@ -31,11 +30,7 @@ def about():
 
 @app.route("/api/health")
 def health():
-    return jsonify({
-        "success": True,
-        "status": "Golden Spy is running",
-        "ai_engine": "Gemini AI"
-    })
+    return jsonify({"status": "ok"})
 
 
 @app.route("/api/investigate", methods=["POST"])
@@ -43,68 +38,62 @@ def run_investigation():
     try:
         data = request.get_json(silent=True) or {}
 
-        question = data.get("question", "")
-        urls = data.get("urls", [])
+        question = data.get("question", "").strip()
+        user_urls = data.get("urls", [])
 
-        if not isinstance(question, str) or not question.strip():
+        if not question:
             return jsonify({
                 "success": False,
-                "error": "Please enter a research question."
+                "error": "Enter a research question."
             }), 400
 
-        question = question.strip()
-
-        if len(question) > 1000:
+        if not isinstance(user_urls, list):
             return jsonify({
                 "success": False,
-                "error": "Question is too long. Maximum 1000 characters."
+                "error": "URLs must be provided as a list."
             }), 400
 
-        if not isinstance(urls, list) or not urls:
+        user_urls = [
+            url.strip()
+            for url in user_urls
+            if isinstance(url, str) and url.strip()
+        ]
+
+        if len(user_urls) > 8:
             return jsonify({
                 "success": False,
-                "error": "Please provide at least one source URL."
+                "error": "Maximum 8 URLs are allowed."
             }), 400
 
-        if len(urls) > 8:
+        # User-provided URLs get priority.
+        # Discover additional sources for the same question.
+        discovered_urls = discover_sources(
+            question,
+            limit=max(0, 8 - len(user_urls))
+        )
+
+        combined_urls = list(dict.fromkeys(
+            user_urls + discovered_urls
+        ))[:8]
+
+        if not combined_urls:
             return jsonify({
                 "success": False,
-                "error": "Maximum 8 source URLs are allowed."
+                "error": "No sources found. Try adding a webpage URL."
             }), 400
 
-        valid_urls = []
+        sources = fetch_sources(combined_urls)
 
-        for url in urls:
-            if not isinstance(url, str):
-                return jsonify({
-                    "success": False,
-                    "error": "Invalid URL format."
-                }), 400
-
-            url = url.strip()
-            parsed = urlparse(url)
-
-            if (
-                parsed.scheme not in ("http", "https")
-                or not parsed.hostname
-            ):
-                return jsonify({
-                    "success": False,
-                    "error": f"Invalid URL: {url}"
-                }), 400
-
-            valid_urls.append(url)
-
-        sources = fetch_sources(valid_urls)
-
-        if not any(
-            source.get("status") == "success"
+        usable_sources = [
+            source for source in sources
+            if source.get("status") == "success"
             and source.get("text", "").strip()
-            for source in sources
-        ):
+        ]
+
+        if not usable_sources:
             return jsonify({
                 "success": False,
-                "error": "Unable to read the provided sources. Try different URLs.",
+                "error": "No readable sources found. Try different URLs.",
                 "sources": sources
             }), 400
 
@@ -115,25 +104,19 @@ def run_investigation():
             "question": question,
             "sources": sources,
             "analysis": analysis,
-            "analysis_mode": "Gemini AI + Source Evidence Analysis",
+            "analysis_mode": "Gemini AI + Automatic Source Discovery + Evidence Analysis",
             "disclaimer": (
                 "AI-generated findings require manual verification. "
-                "Always check the original sources before relying on claims."
+                "Check original sources before relying on claims."
             )
         })
-
-    except ValueError as error:
-        return jsonify({
-            "success": False,
-            "error": str(error)
-        }), 400
 
     except Exception as error:
         app.logger.exception("Investigation failed")
 
         return jsonify({
             "success": False,
-            "error": "Investigation failed. Please try again later."
+            "error": str(error) or "Investigation failed. Please try again."
         }), 500
 
 
