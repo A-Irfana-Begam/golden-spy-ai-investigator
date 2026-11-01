@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Spy | Investigation Room</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .investigate-hero {
+            text-align: center;
+            padding: 55px 10px 35px;
+        }
+        .investigate-hero h1 {
+            font: 700 clamp(35px, 6vw, 58px) 'Cinzel', serif;
+            color: var(--light-gold);
+        }
+        .investigate-hero p { color: #aaa08c; margin-top: 12px; }
+        .scan-stage {
+            height: 160px;
+            display: grid;
+            place-items: center;
+            position: relative;
+            margin: 5px auto 25px;
+        }
+        .scan-ring {
+            width: 135px;
+            height: 135px;
+            border: 1px dashed #d6ad52a0;
+            border-radius: 50%;
+            position: absolute;
+            animation: scanRotate 12s linear infinite;
+        }
+        .scan-ring::before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            left: 62px;
+            width: 10px;
+            height: 10px;
+            background: var(--light-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 18px var(--gold);
+        }
+        .scan-eye {
+            width: 75px;
+            height: 45px;
+            border: 2px solid var(--gold);
+            border-radius: 50% 10%;
+            transform: rotate(45deg);
+            box-shadow: 0 0 25px #d6ad5240;
+            position: relative;
+        }
+        .scan-eye::after {
+            content: "";
+            position: absolute;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: var(--light-gold);
+            box-shadow: 0 0 20px var(--gold);
+            top: 11px;
+            left: 27px;
+        }
+        .investigation {
+            max-width: 780px;
+        }
+        .investigation h2 { text-align: center; }
+        .field-note {
+            color: #9e906f;
+            font-size: 11px;
+            margin: 0 0 12px;
+        }
+        #url-list input { margin-bottom: 10px; }
+        #investigate:disabled { opacity: .5; cursor: wait; }
+        #results { max-width: 900px; margin: 0 auto 70px; }
+        @keyframes scanRotate { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <header>
+        <h2>✦ GOLDEN SPY</h2>
+        <nav>
+            <a href="/">HOME</a>
+            <a href="/investigate">INVESTIGATE</a>
+            <a href="/hub">INTELLIGENCE HUB</a>
+            <a href="/about">ABOUT</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="investigate-hero">
+            <p class="eyebrow">RESTRICTED ACCESS / 002</p>
+            <div class="scan-stage">
+                <div class="scan-ring"></div>
+                <div class="scan-eye"></div>
+            </div>
+            <h1>Investigation Room</h1>
+            <p>Every source holds a clue. Start connecting them.</p>
+        </section>
+
+        <section class="investigation">
+            <h2>⌕ New Investigation</h2>
+
+            <label for="question">Research Question</label>
+            <textarea id="question" placeholder="What information do you want to investigate?"></textarea>
+
+            <label>Source URLs</label>
+            <p class="field-note">Add up to 8 HTTP or HTTPS source links.</p>
+            <div id="url-list">
+                <input class="source-url" type="url" placeholder="https://example.com">
+            </div>
+
+            <button id="add-source" type="button">+ ADD SOURCE</button>
+            <button id="investigate" type="button">✦ INITIATE INVESTIGATION</button>
+            <p id="status"></p>
+        </section>
+
+        <section id="results" hidden>
+            <h2>Investigation Report</h2>
+            <div id="report"></div>
+        </section>
+    </main>
+
+    <footer>GOLDEN SPY © 2026 | INVESTIGATION ROOM</footer>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
