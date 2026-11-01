@@ -4,11 +4,12 @@ import socket
 import ipaddress
 
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin, parse_qs
 
 
 MAX_CONTENT_SIZE = 1_000_000
 MAX_TEXT_LENGTH = 20000
+MAX_SOURCES = 8
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; GoldenSpy/1.0)"
@@ -30,11 +31,9 @@ def validate_url(url):
     if parsed.port and parsed.port not in (80, 443):
         raise ValueError("Only standard HTTP and HTTPS ports are allowed.")
 
-    host = parsed.hostname
-
     try:
         addresses = socket.getaddrinfo(
-            host,
+            parsed.hostname,
             parsed.port or (443 if parsed.scheme == "https" else 80),
             type=socket.SOCK_STREAM
         )
@@ -50,6 +49,47 @@ def validate_url(url):
     return parsed
 
 
+def discover_sources(question, limit=5):
+    """Discover webpages using DuckDuckGo HTML search."""
+
+    search_url = "https://html.duckduckgo.com/html/"
+    discovered = []
+
+    try:
+        response = requests.get(
+            search_url,
+            params={"q": question},
+            headers=HEADERS,
+            timeout=(5, 12)
+        )
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        for link in soup.select("a.result__a"):
+            href = link.get("href", "")
+
+            if "uddg=" in href:
+                href = parse_qs(urlparse(href).query).get("uddg", [""])[0]
+
+            href = urljoin(search_url, href)
+
+            if (
+                href.startswith("http://")
+                or href.startswith("https://")
+            ):
+                if href not in discovered:
+                    discovered.append(href)
+
+            if len(discovered) >= limit:
+                break
+
+    except requests.RequestException:
+        pass
+
+    return discovered[:limit]
+
+
 def extract_content(html, url):
     soup = BeautifulSoup(html, "html.parser")
 
@@ -59,19 +99,17 @@ def extract_content(html, url):
     )
 
     for tag in soup([
-        "script",
-        "style",
-        "nav",
-        "footer",
-        "header",
-        "noscript",
-        "svg",
-        "iframe",
-        "form"
+        "script", "style", "nav", "footer", "header",
+        "noscript", "svg", "iframe", "form"
     ]):
         tag.decompose()
 
-    content = soup.find("main") or soup.find("article") or soup.body or soup
+    content = (
+        soup.find("main")
+        or soup.find("article")
+        or soup.body
+        or soup
+    )
 
     text = " ".join(content.stripped_strings)
 
@@ -80,10 +118,16 @@ def extract_content(html, url):
 
 def fetch_sources(urls):
     results = []
+    seen = set()
 
-    for url in urls:
+    for url in urls[:MAX_SOURCES]:
+        if url in seen:
+            continue
+
+        seen.add(url)
+
         try:
-            parsed = validate_url(url)
+            validate_url(url)
 
             with requests.get(
                 url,
@@ -94,7 +138,9 @@ def fetch_sources(urls):
             ) as response:
 
                 if 300 <= response.status_code < 400:
-                    raise ValueError("Website redirects are not supported. Use its final URL.")
+                    raise ValueError(
+                        "Redirect detected. Use the final webpage URL."
+                    )
 
                 response.raise_for_status()
 
@@ -106,12 +152,17 @@ def fetch_sources(urls):
                     "text/html" not in content_type
                     and "application/xhtml+xml" not in content_type
                 ):
-                    raise ValueError("URL does not contain an HTML webpage.")
+                    raise ValueError("URL is not an HTML webpage.")
 
                 content_length = response.headers.get("Content-Length")
 
-                if content_length and int(content_length) > MAX_CONTENT_SIZE:
-                    raise ValueError("Webpage is too large to process.")
+                if content_length:
+                    try:
+                        if int(content_length) > MAX_CONTENT_SIZE:
+                            raise ValueError("Webpage is too large.")
+                    except ValueError as error:
+                        if str(error) == "Webpage is too large.":
+                            raise
 
                 chunks = []
                 total_size = 0
@@ -123,13 +174,12 @@ def fetch_sources(urls):
                     total_size += len(chunk)
 
                     if total_size > MAX_CONTENT_SIZE:
-                        raise ValueError("Webpage exceeded the 1 MB size limit.")
+                        raise ValueError("Webpage exceeded the 1 MB limit.")
 
                     chunks.append(chunk)
 
-                response.encoding = response.encoding or "utf-8"
                 html = b"".join(chunks).decode(
-                    response.encoding,
+                    response.encoding or "utf-8",
                     errors="replace"
                 )
 
