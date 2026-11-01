@@ -16,10 +16,9 @@ const urlList = document.getElementById("url-list");
 const addSourceButton = document.getElementById("add-source");
 const investigateButton = document.getElementById("investigate");
 
-
 if (addSourceButton && urlList) {
     addSourceButton.onclick = () => {
-        if (urlList.children.length >= 8) {
+        if (urlList.querySelectorAll(".source-url").length >= 8) {
             alert("Maximum 8 sources allowed.");
             return;
         }
@@ -28,6 +27,7 @@ if (addSourceButton && urlList) {
         input.type = "url";
         input.className = "source-url";
         input.placeholder = "https://example.com";
+        input.maxLength = 2048;
 
         urlList.appendChild(input);
     };
@@ -57,45 +57,32 @@ function createCard(title, items) {
             } else if (item && typeof item === "object") {
                 const details = [];
 
-                if (item.claim) details.push(item.claim);
-                if (item.gap) details.push(item.gap);
-                if (item.signal) details.push(item.signal);
+                const fields = [
+                    ["claim", ""],
+                    ["gap", ""],
+                    ["signal", ""],
+                    ["claim_1", "Claim 1: "],
+                    ["claim_2", "Claim 2: "],
+                    ["note", "Analysis: "],
+                    ["task", "Task: "],
+                    ["priority", "Priority: "],
+                    ["source", "Source: "],
+                    ["source_1", "Source 1: "],
+                    ["source_2", "Source 2: "]
+                ];
 
-                if (item.claim_1) {
-                    details.push("Claim 1: " + item.claim_1);
-                }
-
-                if (item.claim_2) {
-                    details.push("Claim 2: " + item.claim_2);
-                }
-
-                if (item.note) {
-                    details.push("Analysis: " + item.note);
-                }
-
-                if (item.task) {
-                    details.push("Task: " + item.task);
-                }
-
-                if (item.priority) {
-                    details.push("Priority: " + item.priority);
-                }
-
-                if (item.source) {
-                    details.push("Source: " + item.source);
-                }
-
-                if (item.source_1) {
-                    details.push("Source 1: " + item.source_1);
-                }
-
-                if (item.source_2) {
-                    details.push("Source 2: " + item.source_2);
-                }
+                fields.forEach(([key, label]) => {
+                    if (typeof item[key] === "string" && item[key].trim()) {
+                        details.push(label + item[key]);
+                    }
+                });
 
                 if (Array.isArray(item.sources)) {
                     details.push(
-                        "Supporting sources: " + item.sources.join(", ")
+                        "Supporting sources: " +
+                        item.sources.filter(
+                            source => typeof source === "string"
+                        ).join(", ")
                     );
                 }
 
@@ -115,19 +102,46 @@ function createCard(title, items) {
 }
 
 
+function validateSourceUrls(urls) {
+    for (const value of urls) {
+        try {
+            const url = new URL(value);
+
+            if (
+                !["http:", "https:"].includes(url.protocol) ||
+                !url.hostname ||
+                url.username ||
+                url.password
+            ) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 if (investigateButton) {
     investigateButton.onclick = async () => {
-        const question = document.getElementById("question").value.trim();
+        const questionInput = document.getElementById("question");
+        const status = document.getElementById("status");
+        const results = document.getElementById("results");
+        const report = document.getElementById("report");
+
+        if (!questionInput || !status || !results || !report) {
+            return;
+        }
+
+        const question = questionInput.value.trim();
 
         const urls = [
             ...document.querySelectorAll(".source-url")
         ]
             .map(input => input.value.trim())
             .filter(Boolean);
-
-        const status = document.getElementById("status");
-        const results = document.getElementById("results");
-        const report = document.getElementById("report");
 
         if (!question) {
             status.textContent = "Enter a research question.";
@@ -139,10 +153,24 @@ if (investigateButton) {
             return;
         }
 
+        if (!validateSourceUrls(urls)) {
+            status.textContent =
+                "Enter valid HTTP or HTTPS webpage URLs.";
+            return;
+        }
+
         investigateButton.disabled = true;
-        status.textContent = "⏳ Discovering sources and investigating...";
+        status.textContent =
+            "⏳ Discovering sources and investigating...";
+
         results.hidden = true;
         report.replaceChildren();
+
+        const controller = new AbortController();
+
+        const timeout = setTimeout(() => {
+            controller.abort();
+        }, 120000);
 
         try {
             const response = await fetch("/api/investigate", {
@@ -153,10 +181,19 @@ if (investigateButton) {
                 body: JSON.stringify({
                     question,
                     urls
-                })
+                }),
+                signal: controller.signal
             });
 
-            const data = await response.json();
+            let data;
+
+            try {
+                data = await response.json();
+            } catch {
+                throw new Error(
+                    "Server returned an invalid response. Please try again."
+                );
+            }
 
             if (!response.ok || !data.success) {
                 throw new Error(
@@ -164,69 +201,51 @@ if (investigateButton) {
                 );
             }
 
-            const analysis = data.analysis || {};
+            if (!data.analysis || typeof data.analysis !== "object") {
+                throw new Error(
+                    "Investigation report is incomplete. Please try again."
+                );
+            }
 
-            report.appendChild(
-                createCard("SUMMARY", analysis.summary)
-            );
+            const analysis = data.analysis;
 
-            report.appendChild(
-                createCard(
+            const sections = [
+                ["SUMMARY", analysis.summary],
+                [
                     "SOURCE-SUPPORTED INFORMATION",
                     analysis.verified_information
-                )
-            );
-
-            report.appendChild(
-                createCard(
+                ],
+                [
                     "CROSS-SOURCE CORROBORATION",
                     analysis.cross_source_corroboration
-                )
-            );
-
-            report.appendChild(
-                createCard(
-                    "INFORMATION GAPS",
-                    analysis.information_gaps
-                )
-            );
-
-            report.appendChild(
-                createCard(
-                    "POTENTIAL CONFLICTS",
-                    analysis.potential_conflicts
-                )
-            );
-
-            report.appendChild(
-                createCard(
-                    "OUTDATED SIGNALS",
-                    analysis.outdated_signals
-                )
-            );
-
-            report.appendChild(
-                createCard(
+                ],
+                ["INFORMATION GAPS", analysis.information_gaps],
+                ["POTENTIAL CONFLICTS", analysis.potential_conflicts],
+                ["OUTDATED SIGNALS", analysis.outdated_signals],
+                [
                     "UNANSWERED QUESTIONS",
                     analysis.unanswered_questions
-                )
-            );
-
-            report.appendChild(
-                createCard(
+                ],
+                [
                     "VERIFICATION CHECKLIST",
                     analysis.verification_checklist
-                )
-            );
+                ]
+            ];
 
-            const sourceStatus = (data.sources || []).map(source => ({
-                claim: source.title || source.url,
-                signal: "Status: " + source.status,
-                note: source.error || ""
-            }));
+            sections.forEach(([title, items]) => {
+                report.appendChild(createCard(title, items));
+            });
+
+            const sourceStatus = Array.isArray(data.sources)
+                ? data.sources.map(source => ({
+                    claim: source.title || source.url || "Unknown source",
+                    signal: "Status: " + (source.status || "unknown"),
+                    note: source.error || ""
+                }))
+                : [];
 
             report.appendChild(
-                createCard("DISCOVERED SOURCE STATUS", sourceStatus)
+                createCard("SOURCE STATUS", sourceStatus)
             );
 
             report.appendChild(
@@ -240,13 +259,21 @@ if (investigateButton) {
             status.textContent = "✓ Investigation completed.";
 
             results.scrollIntoView({
-                behavior: "smooth"
+                behavior: "smooth",
+                block: "start"
             });
 
         } catch (error) {
-            status.textContent = "⚠ " + error.message;
+            if (error.name === "AbortError") {
+                status.textContent =
+                    "⚠ Request timed out. Please try again.";
+            } else {
+                status.textContent =
+                    "⚠ " + (error.message || "Investigation failed.");
+            }
 
         } finally {
+            clearTimeout(timeout);
             investigateButton.disabled = false;
         }
     };
