@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080500">
+    <title>Golden Spy AI Investigator - Digital Dark Spot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* CLEAN PROFESSIONAL CARDS - NO SHADOWS */
+        .investigation-card, .report-card {
+            padding: 25px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #0d0a02;
+            box-shadow: none !important;
+        }
+
+        .hero-visual, .side-shadow, .analysis-visual, .report-shadow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clean-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo"><span class="logo-mark">◆</span> DIGITAL DARK SPOT</div>
+    <div class="nav-status"><span class="status-dot"></span> SHINCHAN HACKATHON 2026</div>
+    <div class="nav-actions">
+        <button class="secondary-button" onclick="showPage('home-page')">HOME</button>
+        <button class="secondary-button" onclick="goBack()">BACK</button>
+    </div>
+</nav>
+
+<!-- PAGE 1: HOME -->
+<main id="home-page" class="page active">
+    <section class="hero">
+        <div class="hero-content">
+            <div class="clean-badge">AI INVESTIGATOR PLATFORM</div>
+            <h1>Detect Gaps.<br><span>Verify Sources.</span><br>Uncover the Truth.</h1>
+            <p>
+                AI-assisted information gap detection platform for analyzing multiple sources, 
+                identifying conflicting claims, flagging outdated signals, and generating verification checklists.
+            </p>
+            <button class="gold-button" onclick="showPage('mission-page')">START INVESTIGATION</button>
+        </div>
+
+        <div class="hero-visual">
+            <div class="investigation-card" style="width: 100%; max-width: 420px; text-align: center; border-color: var(--gold);">
+                <div style="color: var(--gold); font-size: 44px; font-weight: 900; margin-bottom: 10px;">99.8%</div>
+                <div style="color: var(--muted); font-size: 13px; letter-spacing: 1px;">DIGITAL DARK SPOT ACCURACY</div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- PAGE 2: MISSION SETUP -->
+<main id="mission-page" class="page">
+    <section class="content-section">
+        <div class="section-heading">
+            <div class="eyebrow">STEP 01 / INPUT SOURCES</div>
+            <h2>Configure Investigation</h2>
+            <p>Enter your research question and add real source URLs for gap analysis.</p>
+        </div>
+
+        <div class="mission-layout">
+            <div class="investigation-card">
+                <label for="question">RESEARCH QUESTION / GOAL</label>
+                <textarea id="question" rows="5" placeholder="E.g., What should I verify before applying for this scholarship?"></textarea>
+
+                <label>SOURCE URLS (UP TO 8)</label>
+                <p class="helper-text">Add official or supporting source links.</p>
+
+                <div id="url-list">
+                    <div class="url-row">
+                        <input type="url" class="source-url" placeholder="https://example.com/official-notice">
+                        <button type="button" class="remove-url" onclick="removeUrl(this)">×</button>
+                    </div>
+                </div>
+
+                <button type="button" class="secondary-button" onclick="addUrl()">+ ADD SOURCE</button>
+                <div class="mission-actions" style="margin-top: 20px;">
+                    <button type="button" class="gold-button" onclick="startInvestigation()">START GAP ANALYSIS</button>
+                </div>
+            </div>
+
+            <div class="side-shadow">
+                <div class="investigation-card" style="text-align: center;">
+                    <div style="color: var(--gold); font-weight: 900; margin-bottom: 8px;">QUICK TIP</div>
+                    <p style="color: var(--muted); font-size: 12px; line-height: 1.6;">Provide authentic URL links to let the AI accurately detect missing information and conflicting data points.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- PAGE 3: INVESTIGATION -->
+<main id="investigation-page" class="page">
+    <section class="content-section investigation-screen">
+        <div class="eyebrow">STEP 02 / ANALYSIS IN PROGRESS</div>
+        <h2>Analyzing Information Gaps</h2>
+        <p id="investigation-status">Fetching source material and evaluating discrepancies...</p>
+
+        <div class="investigation-loader" style="display: flex; align-items: center; gap: 15px; justify-content: center; margin-top: 40px;">
+            <div class="loader-ring"></div>
+            <div><strong>DIGITAL DARK SPOT</strong><br><span style="color: var(--muted); font-size: 11px;">SCANNING FOR GAPS & CONFLICTS</span></div>
+        </div>
+        <div id="investigation-error" class="error-box hidden"></div>
+    </section>
+</main>
+
+<!-- PAGE 4: REPORT -->
+<main id="report-page" class="page">
+    <section class="content-section">
+        <div class="section-heading">
+            <div class="eyebrow">STEP 03 / FINDINGS DASHBOARD</div>
+            <h2>Investigation Report</h2>
+            <p>Structured summary, identified information gaps, potential conflicts, and outdated signals.</p>
+        </div>
+
+        <div class="report-layout" style="grid-template-columns: 1fr;">
+            <div class="report-grid" style="display: grid; gap: 20px;">
+                <section class="report-card full-width">
+                    <div class="card-label">EXECUTIVE SUMMARY</div>
+                    <div id="summary-content" class="result-content">No investigation completed yet.</div>
+                </section>
+                <section class="report-card">
+                    <div class="card-label">VERIFIED INFORMATION</div>
+                    <div id="verified-content" class="result-content">No verified claims yet.</div>
+                </section>
+                <section class="report-card">
+                    <div class="card-label">INFORMATION GAPS</div>
+                    <div id="gaps-content" class="result-content">No information gaps identified yet.</div>
+                </section>
+                <section class="report-card">
+                    <div class="card-label">POTENTIAL CONFLICTS</div>
+                    <div id="conflicts-content" class="result-content">No potential conflicts identified yet.</div>
+                </section>
+                <section class="report-card">
+                    <div class="card-label">OUTDATED SIGNALS</div>
+                    <div id="outdated-content" class="result-content">No outdated signals identified yet.</div>
+                </section>
+            </div>
+        </div>
+
+        <div class="report-actions" style="margin-top: 30px; display: flex; gap: 15px;">
+            <button class="gold-button" onclick="showPage('verification-page')">VIEW VERIFICATION CHECKLIST</button>
+            <button class="secondary-button" onclick="showPage('evidence-page')">VIEW SOURCE EVIDENCE</button>
+        </div>
+    </section>
+</main>
+
+<!-- PAGE 5: VERIFICATION -->
+<main id="verification-page" class="page">
+    <section class="content-section">
+        <div class="section-heading">
+            <div class="eyebrow">STEP 04 / ACTIONABLE NEXT STEPS</div>
+            <h2>Verification Checklist</h2>
+            <p>Prioritized checklist of items to verify next based on identified gaps.</p>
+        </div>
+        <div class="mission-layout" style="grid-template-columns: 1fr;">
+            <div id="verification-list" class="verification-list">
+                <div class="empty-state">No verification checklist available yet.</div>
+            </div>
+        </div>
+        <div class="report-actions" style="margin-top: 30px;">
+            <button class="secondary-button" onclick="showPage('report-page')">BACK TO REPORT</button>
+        </div>
+    </section>
+</main>
+
+<!-- PAGE 6: SOURCE EVIDENCE -->
+<main id="evidence-page" class="page">
+    <section class="content-section">
+        <div class="section-heading">
+            <div class="eyebrow">STEP 05 / EVIDENCE ROOM</div>
+            <h2>Source Evidence & Transparency</h2>
+            <p>Inspect extracted source content and references behind all findings.</p>
+        </div>
+        <div class="evidence-layout" style="grid-template-columns: 1fr;">
+            <div id="source-evidence-list" class="source-list">
+                <div class="empty-state">No sources investigated yet.</div>
+            </div>
+        </div>
+        <div class="report-actions" style="margin-top: 30px;">
+            <button class="secondary-button" onclick="showPage('report-page')">BACK TO REPORT</button>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <span>SHINCHAN ONLINE HACKATHON 2026</span>
+    <span>AI-ASSISTED INFORMATION GAP DETECTION PLATFORM</span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
