@@ -4,7 +4,7 @@ import socket
 import ipaddress
 
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin, parse_qs
+from urllib.parse import urlparse, urljoin, parse_qs, unquote
 
 
 MAX_CONTENT_SIZE = 1_000_000
@@ -17,7 +17,10 @@ HEADERS = {
 
 
 def validate_url(url):
-    parsed = urlparse(url)
+    if not isinstance(url, str) or not url.strip():
+        raise ValueError("Invalid URL.")
+
+    parsed = urlparse(url.strip())
 
     if parsed.scheme not in ("http", "https"):
         raise ValueError("Only HTTP and HTTPS URLs are allowed.")
@@ -28,23 +31,42 @@ def validate_url(url):
     if parsed.username or parsed.password:
         raise ValueError("URLs containing credentials are not allowed.")
 
-    if parsed.port and parsed.port not in (80, 443):
+    try:
+        port = parsed.port
+    except ValueError:
+        raise ValueError("Invalid URL port.")
+
+    if port and port not in (80, 443):
         raise ValueError("Only standard HTTP and HTTPS ports are allowed.")
 
-    try:
-        addresses = socket.getaddrinfo(
-            parsed.hostname,
-            parsed.port or (443 if parsed.scheme == "https" else 80),
-            type=socket.SOCK_STREAM
-        )
-    except socket.gaierror:
-        raise ValueError("Unable to resolve website hostname.")
+    hostname = parsed.hostname.rstrip(".")
 
-    for address in addresses:
-        ip = ipaddress.ip_address(address[4][0])
+    try:
+        ip = ipaddress.ip_address(hostname)
 
         if not ip.is_global:
             raise ValueError("Private or restricted IP addresses are not allowed.")
+
+    except ValueError as error:
+        if "Private or restricted" in str(error):
+            raise
+
+        try:
+            addresses = socket.getaddrinfo(
+                hostname,
+                port or (443 if parsed.scheme == "https" else 80),
+                type=socket.SOCK_STREAM
+            )
+        except socket.gaierror:
+            raise ValueError("Unable to resolve website hostname.")
+
+        for address in addresses:
+            ip = ipaddress.ip_address(address[4][0])
+
+            if not ip.is_global:
+                raise ValueError(
+                    "Private or restricted IP addresses are not allowed."
+                )
 
     return parsed
 
@@ -52,40 +74,78 @@ def validate_url(url):
 def discover_sources(question, limit=5):
     """Discover webpages using DuckDuckGo HTML search."""
 
+    if not isinstance(question, str) or not question.strip():
+        return []
+
+    if not isinstance(limit, int) or limit <= 0:
+        return []
+
+    limit = min(limit, MAX_SOURCES)
+
     search_url = "https://html.duckduckgo.com/html/"
     discovered = []
+    seen = set()
 
     try:
         response = requests.get(
             search_url,
-            params={"q": question},
+            params={"q": question.strip()},
             headers=HEADERS,
             timeout=(5, 12)
         )
+
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
 
         for link in soup.select("a.result__a"):
-            href = link.get("href", "")
+            href = link.get("href", "").strip()
+
+            if not href:
+                continue
 
             if "uddg=" in href:
-                href = parse_qs(urlparse(href).query).get("uddg", [""])[0]
+                parsed_link = urlparse(href)
+
+                href = parse_qs(
+                    parsed_link.query
+                ).get("uddg", [""])[0]
+
+                href = unquote(href)
 
             href = urljoin(search_url, href)
 
-            if (
-                href.startswith("http://")
-                or href.startswith("https://")
-            ):
-                if href not in discovered:
-                    discovered.append(href)
+            try:
+                parsed = validate_url(href)
 
-            if len(discovered) >= limit:
-                break
+                if parsed.hostname in (
+                    "html.duckduckgo.com",
+                    "duckduckgo.com",
+                    "www.duckduckgo.com"
+                ):
+                    continue
+
+                normalized = parsed._replace(
+                    fragment=""
+                ).geturl()
+
+                if normalized in seen:
+                    continue
+
+                seen.add(normalized)
+                discovered.append(normalized)
+
+                if len(discovered) >= limit:
+                    break
+
+            except (ValueError, TypeError):
+                continue
 
     except requests.RequestException:
-        pass
+        return []
+
+    except Exception:
+        return []
 
     return discovered[:limit]
 
@@ -120,8 +180,16 @@ def fetch_sources(urls):
     results = []
     seen = set()
 
+    if not isinstance(urls, list):
+        return results
+
     for url in urls[:MAX_SOURCES]:
-        if url in seen:
+        if not isinstance(url, str):
+            continue
+
+        url = url.strip()
+
+        if not url or url in seen:
             continue
 
         seen.add(url)
@@ -139,7 +207,8 @@ def fetch_sources(urls):
 
                 if 300 <= response.status_code < 400:
                     raise ValueError(
-                        "Redirect detected. Use the final webpage URL."
+                        "Website redirect detected. "
+                        "Use the final webpage URL."
                     )
 
                 response.raise_for_status()
@@ -152,17 +221,22 @@ def fetch_sources(urls):
                     "text/html" not in content_type
                     and "application/xhtml+xml" not in content_type
                 ):
-                    raise ValueError("URL is not an HTML webpage.")
+                    raise ValueError(
+                        "URL is not an HTML webpage."
+                    )
 
-                content_length = response.headers.get("Content-Length")
+                content_length = response.headers.get(
+                    "Content-Length"
+                )
 
                 if content_length:
                     try:
                         if int(content_length) > MAX_CONTENT_SIZE:
                             raise ValueError("Webpage is too large.")
-                    except ValueError as error:
-                        if str(error) == "Webpage is too large.":
-                            raise
+                    except ValueError:
+                        raise ValueError(
+                            "Invalid or excessive webpage size."
+                        )
 
                 chunks = []
                 total_size = 0
@@ -174,7 +248,9 @@ def fetch_sources(urls):
                     total_size += len(chunk)
 
                     if total_size > MAX_CONTENT_SIZE:
-                        raise ValueError("Webpage exceeded the 1 MB limit.")
+                        raise ValueError(
+                            "Webpage exceeded the 1 MB limit."
+                        )
 
                     chunks.append(chunk)
 
@@ -186,7 +262,9 @@ def fetch_sources(urls):
             title, text = extract_content(html, url)
 
             if not text.strip():
-                raise ValueError("No readable webpage content found.")
+                raise ValueError(
+                    "No readable webpage content found."
+                )
 
             results.append({
                 "url": url,
