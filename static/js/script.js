@@ -1,29 +1,38 @@
 
 const particles = document.getElementById("particles");
 
-for (let i = 0; i < 55; i++) {
-    const p = document.createElement("span");
-    p.className = "particle";
-    p.style.left = Math.random() * 100 + "%";
-    p.style.animationDelay = Math.random() * 8 + "s";
-    p.style.animationDuration = 5 + Math.random() * 8 + "s";
-    particles.appendChild(p);
+if (particles) {
+    for (let i = 0; i < 55; i++) {
+        const p = document.createElement("span");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "%";
+        p.style.animationDelay = Math.random() * 8 + "s";
+        p.style.animationDuration = 5 + Math.random() * 8 + "s";
+        particles.appendChild(p);
+    }
 }
 
 const urlList = document.getElementById("url-list");
+const addSourceButton = document.getElementById("add-source");
+const investigateButton = document.getElementById("investigate");
 
-document.getElementById("add-source").onclick = () => {
-    if (urlList.children.length >= 8) {
-        alert("Maximum 8 sources allowed.");
-        return;
-    }
 
-    const input = document.createElement("input");
-    input.type = "url";
-    input.className = "source-url";
-    input.placeholder = "https://example.com";
-    urlList.appendChild(input);
-};
+if (addSourceButton && urlList) {
+    addSourceButton.onclick = () => {
+        if (urlList.children.length >= 8) {
+            alert("Maximum 8 sources allowed.");
+            return;
+        }
+
+        const input = document.createElement("input");
+        input.type = "url";
+        input.className = "source-url";
+        input.placeholder = "https://example.com";
+
+        urlList.appendChild(input);
+    };
+}
+
 
 function createCard(title, items) {
     const card = document.createElement("div");
@@ -35,88 +44,200 @@ function createCard(title, items) {
 
     const list = document.createElement("ul");
 
-    items.forEach(item => {
-        const li = document.createElement("li");
+    if (!Array.isArray(items) || items.length === 0) {
+        const empty = document.createElement("li");
+        empty.textContent = "No findings detected.";
+        list.appendChild(empty);
+    } else {
+        items.forEach(item => {
+            const li = document.createElement("li");
 
-        if (typeof item === "string") {
-            li.textContent = item;
-        } else {
-            li.textContent = [
-                item.claim || item.signal || item.task || "",
-                item.source ? " | Source: " + item.source : ""
-            ].join("");
-        }
+            if (typeof item === "string") {
+                li.textContent = item;
+            } else if (item && typeof item === "object") {
 
-        list.appendChild(li);
-    });
+                const details = [];
+
+                if (item.claim) details.push(item.claim);
+                if (item.gap) details.push(item.gap);
+                if (item.signal) details.push(item.signal);
+
+                if (item.claim_1) {
+                    details.push("Claim 1: " + item.claim_1);
+                }
+
+                if (item.claim_2) {
+                    details.push("Claim 2: " + item.claim_2);
+                }
+
+                if (item.note) {
+                    details.push("Analysis: " + item.note);
+                }
+
+                if (item.task) {
+                    details.push("Task: " + item.task);
+                }
+
+                if (item.priority) {
+                    details.push("Priority: " + item.priority);
+                }
+
+                if (item.source) {
+                    details.push("Source: " + item.source);
+                }
+
+                if (item.source_1) {
+                    details.push("Source 1: " + item.source_1);
+                }
+
+                if (item.source_2) {
+                    details.push("Source 2: " + item.source_2);
+                }
+
+                li.textContent = details.length
+                    ? details.join(" | ")
+                    : "No details available.";
+            } else {
+                li.textContent = "No details available.";
+            }
+
+            list.appendChild(li);
+        });
+    }
 
     card.appendChild(list);
     return card;
 }
 
-document.getElementById("investigate").onclick = async () => {
-    const question = document.getElementById("question").value.trim();
 
-    const urls = [...document.querySelectorAll(".source-url")]
-        .map(input => input.value.trim())
-        .filter(Boolean);
+if (investigateButton) {
+    investigateButton.onclick = async () => {
+        const question = document.getElementById("question").value.trim();
 
-    const status = document.getElementById("status");
-    const results = document.getElementById("results");
-    const report = document.getElementById("report");
-    const button = document.getElementById("investigate");
+        const urls = [
+            ...document.querySelectorAll(".source-url")
+        ]
+            .map(input => input.value.trim())
+            .filter(Boolean);
 
-    if (!question || !urls.length) {
-        status.textContent = "Enter a question and at least one URL.";
-        return;
-    }
+        const status = document.getElementById("status");
+        const results = document.getElementById("results");
+        const report = document.getElementById("report");
 
-    button.disabled = true;
-    status.textContent = "⏳ Investigating sources...";
-    results.hidden = true;
-    report.replaceChildren();
-
-    try {
-        const response = await fetch("/api/investigate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question, urls })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || "Investigation failed.");
+        if (!question || !urls.length) {
+            status.textContent = "Enter a question and at least one URL.";
+            return;
         }
 
-        const analysis = data.analysis;
+        if (urls.length > 8) {
+            status.textContent = "Maximum 8 sources allowed.";
+            return;
+        }
 
-        report.appendChild(createCard("SUMMARY", analysis.summary || []));
-        report.appendChild(createCard("VERIFIED INFORMATION", analysis.verified_information || []));
-        report.appendChild(createCard("INFORMATION GAPS", analysis.information_gaps || []));
-        report.appendChild(createCard("POTENTIAL CONFLICTS", analysis.potential_conflicts || []));
-        report.appendChild(createCard("OUTDATED SIGNALS", analysis.outdated_signals || []));
-        report.appendChild(createCard("UNANSWERED QUESTIONS", analysis.unanswered_questions || []));
-        report.appendChild(createCard("VERIFICATION CHECKLIST", analysis.verification_checklist || []));
+        investigateButton.disabled = true;
+        status.textContent = "⏳ Gemini AI is investigating...";
+        results.hidden = true;
+        report.replaceChildren();
 
-        report.appendChild(createCard("SOURCE STATUS",
-            (data.sources || []).map(s =>
-                `${s.title || s.url}: ${s.status}${s.error ? " - " + s.error : ""}`
-            )
-        ));
+        try {
+            const response = await fetch("/api/investigate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    question,
+                    urls
+                })
+            });
 
-        report.appendChild(createCard("ANALYSIS MODE", [
-            data.analysis_mode,
-            data.disclaimer
-        ]));
+            const data = await response.json();
 
-        results.hidden = false;
-        status.textContent = "✓ Investigation completed.";
-        results.scrollIntoView({ behavior: "smooth" });
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.error || "Investigation failed."
+                );
+            }
 
-    } catch (error) {
-        status.textContent = "⚠ " + error.message;
-    } finally {
-        button.disabled = false;
-    }
-};
+            const analysis = data.analysis || {};
+
+            report.appendChild(
+                createCard("SUMMARY", analysis.summary)
+            );
+
+            report.appendChild(
+                createCard(
+                    "VERIFIED INFORMATION",
+                    analysis.verified_information
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "INFORMATION GAPS",
+                    analysis.information_gaps
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "POTENTIAL CONFLICTS",
+                    analysis.potential_conflicts
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "OUTDATED SIGNALS",
+                    analysis.outdated_signals
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "UNANSWERED QUESTIONS",
+                    analysis.unanswered_questions
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "VERIFICATION CHECKLIST",
+                    analysis.verification_checklist
+                )
+            );
+
+            const sourceStatus = (data.sources || []).map(source => {
+                return {
+                    claim: source.title || source.url,
+                    signal: "Status: " + source.status,
+                    note: source.error || ""
+                };
+            });
+
+            report.appendChild(
+                createCard("SOURCE STATUS", sourceStatus)
+            );
+
+            report.appendChild(
+                createCard("ANALYSIS MODE", [
+                    data.analysis_mode || "Gemini AI",
+                    data.disclaimer || ""
+                ])
+            );
+
+            results.hidden = false;
+            status.textContent = "✓ Investigation completed.";
+
+            results.scrollIntoView({
+                behavior: "smooth"
+            });
+
+        } catch (error) {
+            status.textContent = "⚠ " + error.message;
+
+        } finally {
+            investigateButton.disabled = false;
+        }
+    };
+}
