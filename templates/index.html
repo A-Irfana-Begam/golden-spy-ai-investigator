@@ -4,51 +4,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Spy | Intelligence System</title>
+    <title>Golden Spy | Home</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .home-hero {
+            min-height: 75vh;
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            align-items: center;
+            gap: 30px;
+        }
+        .home-hero h1 {
+            font: 700 clamp(42px, 7vw, 78px) 'Cinzel', serif;
+            line-height: 1.15;
+        }
+        .home-hero h1 span { color: var(--light-gold); }
+        .home-hero p { color: #b8ad98; line-height: 1.9; margin: 22px 0; }
+        .home-shadow {
+            height: 350px;
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+        .shadow-orbit {
+            position: absolute;
+            width: 270px;
+            height: 270px;
+            border: 1px solid #d6ad5260;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #d6ad5220, inset 0 0 35px #d6ad5215;
+            animation: orbit 12s linear infinite;
+        }
+        .shadow-orbit::before, .shadow-orbit::after {
+            content: "";
+            position: absolute;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--light-gold);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        .shadow-orbit::before { top: 25px; left: 35px; }
+        .shadow-orbit::after { bottom: 20px; right: 30px; }
+        .mystery-shadow {
+            width: 145px;
+            height: 220px;
+            position: relative;
+            animation: floatShadow 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 22px #d6ad5270);
+        }
+        .mystery-shadow .head {
+            position: absolute;
+            width: 105px;
+            height: 100px;
+            background: #030302;
+            border-radius: 48% 48% 42% 42%;
+            top: 8px;
+            left: 20px;
+        }
+        .mystery-shadow .body {
+            position: absolute;
+            width: 140px;
+            height: 115px;
+            background: #030302;
+            border-radius: 55% 55% 15% 15%;
+            bottom: 0;
+            left: 2px;
+        }
+        .mystery-shadow .hair {
+            position: absolute;
+            top: 0;
+            left: 22px;
+            width: 100px;
+            height: 30px;
+            background: #030302;
+            clip-path: polygon(0 70%, 15% 0, 30% 55%, 48% 0, 62% 55%, 85% 0, 100% 70%);
+        }
+        .home-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .home-actions a {
+            text-decoration: none;
+            padding: 14px 23px;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            color: var(--light-gold);
+            letter-spacing: 1px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .home-actions a.primary {
+            background: linear-gradient(100deg, #9d742b, #f4d58b);
+            color: #100d06;
+        }
+        .home-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 30px 0 80px;
+        }
+        .home-card {
+            padding: 25px;
+            min-height: 170px;
+            background: #15130e;
+            border: 1px solid #705a2e80;
+            border-radius: 12px;
+            transition: .3s;
+        }
+        .home-card:hover { transform: translateY(-8px); border-color: var(--light-gold); }
+        .home-card h3 { color: var(--light-gold); font-family: 'Cinzel', serif; margin-bottom: 12px; }
+        .home-card p { color: #aaa08c; line-height: 1.7; font-size: 13px; }
+        nav { display: flex; gap: 22px; flex-wrap: wrap; }
+        nav a { color: var(--light-gold); text-decoration: none; font-size: 12px; letter-spacing: 1px; }
+        nav a:hover { color: white; }
+        @keyframes orbit { to { transform: rotate(360deg); } }
+        @keyframes floatShadow {
+            0%,100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+        @media(max-width:700px) {
+            .home-hero { grid-template-columns: 1fr; text-align: center; padding-top: 50px; }
+            .home-actions { justify-content: center; }
+            .home-shadow { height: 280px; }
+            .home-cards { grid-template-columns: 1fr; }
+            header { gap: 18px; }
+            nav { justify-content: center; }
+        }
+    </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
 
-<div class="particles" id="particles"></div>
+    <header>
+        <h2>✦ GOLDEN SPY</h2>
+        <nav>
+            <a href="/">HOME</a>
+            <a href="/investigate">INVESTIGATE</a>
+            <a href="/hub">INTELLIGENCE HUB</a>
+            <a href="/about">ABOUT</a>
+        </nav>
+    </header>
 
-<header>
-    <h2>✦ GOLDEN SPY</h2>
-    <span class="status">● INTELLIGENCE SYSTEM ONLINE</span>
-</header>
+    <main>
+        <section class="home-hero">
+            <div>
+                <p class="eyebrow">CLASSIFIED INTELLIGENCE PLATFORM</p>
+                <h1>Look Beyond<br>The <span>Shadows.</span></h1>
+                <p>
+                    Information is everywhere. The truth is not always visible.
+                    Investigate sources, uncover information gaps and discover
+                    details that deserve verification.
+                </p>
+                <div class="home-actions">
+                    <a class="primary" href="/investigate">START INVESTIGATION ↗</a>
+                    <a href="/about">EXPLORE PROJECT</a>
+                </div>
+            </div>
 
-<main>
-    <section class="hero">
-        <div class="shadow">🕵</div>
-        <p class="eyebrow">CLASSIFIED INTELLIGENCE PLATFORM</p>
-        <h1>Uncover The <span>Unknown.</span></h1>
-        <p>Investigate information gaps. Discover hidden conflicts. Verify the truth.</p>
-    </section>
+            <div class="home-shadow">
+                <div class="shadow-orbit"></div>
+                <div class="mystery-shadow">
+                    <div class="hair"></div>
+                    <div class="head"></div>
+                    <div class="body"></div>
+                </div>
+            </div>
+        </section>
 
-    <section class="investigation">
-        <h2>⌕ Start Investigation</h2>
+        <p class="eyebrow">YOUR INTELLIGENCE NETWORK</p>
+        <section class="home-cards">
+            <div class="home-card">
+                <h3>01 / INVESTIGATE</h3>
+                <p>Examine multiple web sources using your research question.</p>
+            </div>
+            <div class="home-card">
+                <h3>02 / DISCOVER</h3>
+                <p>Identify potential gaps, outdated signals and conflicting details.</p>
+            </div>
+            <div class="home-card">
+                <h3>03 / VERIFY</h3>
+                <p>Review evidence and follow a verification checklist.</p>
+            </div>
+        </section>
+    </main>
 
-        <label>Research Question</label>
-        <textarea id="question" placeholder="What information do you want to investigate?"></textarea>
-
-        <label>Source URLs</label>
-        <div id="url-list">
-            <input class="source-url" type="url" placeholder="https://example.com">
-        </div>
-
-        <button id="add-source" type="button">+ Add Source</button>
-        <button id="investigate" type="button">✦ INITIATE INVESTIGATION</button>
-
-        <p id="status"></p>
-    </section>
-
-    <section id="results" hidden>
-        <h2>Investigation Report</h2>
-        <div id="report"></div>
-    </section>
-</main>
-
-<footer>GOLDEN SPY © 2026 | THINK BEYOND THE SHADOWS</footer>
-
-<script src="/static/js/script.js"></script>
+    <footer>GOLDEN SPY © 2026 | THINK BEYOND THE SHADOWS</footer>
+    <script src="/static/js/script.js"></script>
 </body>
 </html>
