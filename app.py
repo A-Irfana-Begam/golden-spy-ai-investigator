@@ -1,12 +1,29 @@
+
 from flask import Flask, request, jsonify, render_template
 from services.source_fetcher import fetch_sources
 from services.ai_analyzer import analyze_sources
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
+
+@app.route('/investigate')
+def investigate_page():
+    return render_template('investigate.html')
+
+
+@app.route('/hub')
+def intelligence_hub():
+    return render_template('hub.html')
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 
 @app.route('/api/health')
@@ -63,7 +80,7 @@ def investigate():
 
     sources = fetch_sources(urls)
 
-    if not any(source.get('status') == 'success' for source in sources):
+    if not any(s.get('status') == 'success' for s in sources):
         return jsonify({
             'success': False,
             'error': 'Unable to access the supplied sources.',
@@ -72,7 +89,6 @@ def investigate():
 
     try:
         analysis = analyze_sources(question, sources)
-
     except ValueError as error:
         return jsonify({
             'success': False,
