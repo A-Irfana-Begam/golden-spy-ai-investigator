@@ -16,7 +16,6 @@ const urlList = document.getElementById("url-list");
 const addSourceButton = document.getElementById("add-source");
 const investigateButton = document.getElementById("investigate");
 
-
 if (addSourceButton && urlList) {
     addSourceButton.onclick = () => {
         if (urlList.children.length >= 8) {
@@ -32,7 +31,6 @@ if (addSourceButton && urlList) {
         urlList.appendChild(input);
     };
 }
-
 
 function createCard(title, items) {
     const card = document.createElement("div");
@@ -55,7 +53,6 @@ function createCard(title, items) {
             if (typeof item === "string") {
                 li.textContent = item;
             } else if (item && typeof item === "object") {
-
                 const details = [];
 
                 if (item.claim) details.push(item.claim);
@@ -94,6 +91,12 @@ function createCard(title, items) {
                     details.push("Source 2: " + item.source_2);
                 }
 
+                if (Array.isArray(item.sources)) {
+                    details.push(
+                        "Supporting sources: " + item.sources.join(", ")
+                    );
+                }
+
                 li.textContent = details.length
                     ? details.join(" | ")
                     : "No details available.";
@@ -108,7 +111,6 @@ function createCard(title, items) {
     card.appendChild(list);
     return card;
 }
-
 
 if (investigateButton) {
     investigateButton.onclick = async () => {
@@ -154,9 +156,7 @@ if (investigateButton) {
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                throw new Error(
-                    data.error || "Investigation failed."
-                );
+                throw new Error(data.error || "Investigation failed.");
             }
 
             const analysis = data.analysis || {};
@@ -169,6 +169,13 @@ if (investigateButton) {
                 createCard(
                     "SOURCE-SUPPORTED INFORMATION",
                     analysis.verified_information
+                )
+            );
+
+            report.appendChild(
+                createCard(
+                    "CROSS-SOURCE CORROBORATION",
+                    analysis.cross_source_corroboration
                 )
             );
 
@@ -207,13 +214,11 @@ if (investigateButton) {
                 )
             );
 
-            const sourceStatus = (data.sources || []).map(source => {
-                return {
-                    claim: source.title || source.url,
-                    signal: "Status: " + source.status,
-                    note: source.error || ""
-                };
-            });
+            const sourceStatus = (data.sources || []).map(source => ({
+                claim: source.title || source.url,
+                signal: "Status: " + source.status,
+                note: source.error || ""
+            }));
 
             report.appendChild(
                 createCard("SOURCE STATUS", sourceStatus)
