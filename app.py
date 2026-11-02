@@ -14,12 +14,12 @@ def home():
 
 
 @app.route("/investigate")
-def investigate():
+def investigate_page():
     return render_template("investigate.html")
 
 
 @app.route("/hub")
-def hub():
+def intelligence_hub():
     return render_template("hub.html")
 
 
@@ -30,77 +30,87 @@ def about():
 
 @app.route("/api/health")
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({
+        "status": "online",
+        "project": "Golden Spy",
+        "engine": "Local Rule-Based Intelligence Engine",
+        "api_required": False
+    })
 
 
 @app.route("/api/investigate", methods=["POST"])
-def run_investigation():
+def investigate():
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "success": False,
+            "error": "Invalid request."
+        }), 400
+
+    question = data.get("question", "")
+    urls = data.get("urls", [])
+
+    if not isinstance(question, str) or not question.strip():
+        return jsonify({
+            "success": False,
+            "error": "Enter a research question."
+        }), 400
+
+    question = question.strip()
+
+    if len(question) > 1000:
+        return jsonify({
+            "success": False,
+            "error": "Question must not exceed 1000 characters."
+        }), 400
+
+    if not isinstance(urls, list):
+        return jsonify({
+            "success": False,
+            "error": "URLs must be provided as a list."
+        }), 400
+
+    if len(urls) > 8:
+        return jsonify({
+            "success": False,
+            "error": "Maximum 8 URLs are allowed."
+        }), 400
+
+    urls = [
+        url.strip()
+        for url in urls
+        if isinstance(url, str) and url.strip()
+    ]
+
+    if any(
+        not url.startswith(("https://", "http://"))
+        for url in urls
+    ):
+        return jsonify({
+            "success": False,
+            "error": "Only HTTP and HTTPS URLs are allowed."
+        }), 400
+
     try:
-        data = request.get_json(silent=True)
-
-        if not isinstance(data, dict):
-            return jsonify({
-                "success": False,
-                "error": "Invalid request. Please try again."
-            }), 400
-
-        question = data.get("question", "")
-        user_urls = data.get("urls", [])
-
-        if not isinstance(question, str) or not question.strip():
-            return jsonify({
-                "success": False,
-                "error": "Enter a research question."
-            }), 400
-
-        question = question.strip()
-
-        if len(question) > 1000:
-            return jsonify({
-                "success": False,
-                "error": "Research question is too long. Maximum 1000 characters."
-            }), 400
-
-        if not isinstance(user_urls, list):
-            return jsonify({
-                "success": False,
-                "error": "URLs must be provided as a list."
-            }), 400
-
-        user_urls = [
-            url.strip()
-            for url in user_urls
-            if isinstance(url, str) and url.strip()
-        ]
-
-        if len(user_urls) > 8:
-            return jsonify({
-                "success": False,
-                "error": "Maximum 8 URLs are allowed."
-            }), 400
-
         discovered_urls = []
 
-        if len(user_urls) < 8:
-            try:
-                discovered_urls = discover_sources(
-                    question,
-                    limit=8 - len(user_urls)
-                ) or []
-            except Exception:
-                app.logger.warning(
-                    "Automatic source discovery failed.",
-                    exc_info=True
-                )
+        if len(urls) < 8:
+            discovered_urls = discover_sources(
+                question,
+                limit=8 - len(urls)
+            ) or []
 
         combined_urls = list(dict.fromkeys(
-            user_urls + discovered_urls
+            urls + discovered_urls
         ))[:8]
 
         if not combined_urls:
             return jsonify({
                 "success": False,
-                "error": "No sources found. Try again or provide webpage URLs."
+                "error": (
+                    "No sources found. Add webpage URLs and try again."
+                )
             }), 400
 
         sources = fetch_sources(combined_urls)
@@ -115,7 +125,7 @@ def run_investigation():
         if not usable_sources:
             return jsonify({
                 "success": False,
-                "error": "No readable sources found. Try different URLs.",
+                "error": "No readable sources found.",
                 "sources": sources
             }), 400
 
@@ -126,14 +136,11 @@ def run_investigation():
             "question": question,
             "sources": sources,
             "analysis": analysis,
-            "analysis_mode": (
-                "Gemini AI + Automatic Source Discovery + Evidence Analysis"
-                if discovered_urls
-                else "Gemini AI + Evidence Analysis"
-            ),
+            "analysis_mode": "Local Rule-Based Evidence Analysis",
             "disclaimer": (
-                "AI-generated findings require manual verification. "
-                "Check original sources before relying on claims."
+                "This tool uses keyword-based analysis, not AI. "
+                "Findings are preliminary signals. Verify claims "
+                "using original sources."
             )
         })
 
@@ -148,12 +155,9 @@ def run_investigation():
 
         return jsonify({
             "success": False,
-            "error": (
-                "Investigation could not be completed. "
-                "Please try again later."
-            )
+            "error": "Investigation failed. Please try again."
         }), 500
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False)
