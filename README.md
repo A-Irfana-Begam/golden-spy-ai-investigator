@@ -1,28 +1,27 @@
 # ✦ GOLDEN SPY
-### AI-Assisted Information Gap Detection Platform
+### Information Gap Detection Platform
 
-Golden Spy is an AI-assisted research platform that analyzes information from multiple web sources to identify potential information gaps, conflicting claims, outdated signals, and unanswered questions.
+Golden Spy is a web-based research platform that analyzes information collected from multiple web sources to highlight potential information gaps, source-supported findings, and unanswered questions.
 
-Instead of simply summarizing webpages, Golden Spy helps users understand what the available evidence supports, what remains unclear, and what needs further verification.
+Instead of simply summarizing webpages, Golden Spy helps users understand what the collected sources mention, what remains unclear, and what needs further verification.
 
 ## 🎯 Problem Statement
 
-Digital information is widely available, but it can be incomplete, inconsistent, or outdated. Manually comparing multiple sources takes time and makes it difficult to identify missing information and conflicting claims.
+Digital information can be incomplete, inconsistent, or outdated. Comparing multiple sources manually takes time and makes it difficult to identify missing details and areas that require further investigation.
 
-Golden Spy addresses this challenge through automated source collection and AI-assisted evidence analysis.
+Golden Spy aims to make this process more structured through automated source collection and local rule-based evidence analysis.
 
 ## 🚀 Key Features
 
-- **Automatic Source Discovery:** Discover relevant webpages based on a research question.
-- **Multiple Source Analysis:** Analyze content collected from multiple webpages.
-- **Direct Answer:** Generate an answer based on the available source material.
-- **Evidence Analysis:** Identify claims supported by the collected sources.
-- **Information Gap Detection:** Highlight details that the available sources do not adequately explain.
-- **Conflict Detection:** Identify potentially incompatible claims between sources.
-- **Outdated Signal Detection:** Flag information that may require an updated source.
-- **Unanswered Questions:** Identify questions that remain unresolved.
-- **Verification Checklist:** Suggest follow-up tasks for checking important information.
-- **Source References:** Connect findings to their source URLs.
+- **Automatic Source Discovery:** Find relevant webpages based on a research question.
+- **Multiple Source Analysis:** Collect and examine content from multiple webpages.
+- **Source-Supported Information:** Highlight text from collected sources that matches the research question.
+- **Information Gap Detection:** Identify sources that do not contain clearly relevant information.
+- **Topical Cross-Source Comparison:** Highlight overlapping keywords across different sources.
+- **Unanswered Questions:** Indicate when the collected sources do not provide clearly relevant information.
+- **Verification Checklist:** Suggest follow-up tasks for manually checking findings.
+- **Source References:** Display the URLs used during the investigation.
+- **API-Key-Free Operation:** Perform analysis locally without requiring an external AI API.
 
 ## ⚙️ How It Works
 
@@ -30,16 +29,16 @@ Golden Spy addresses this challenge through automated source collection and AI-a
    Enter a question and optionally provide webpage URLs.
 
 2. **Collect Sources**  
-   Golden Spy discovers relevant webpages and collects readable content.
+   Golden Spy discovers relevant webpages and extracts readable content.
 
-3. **Analyze Evidence**  
-   Gemini AI examines the extracted content and identifies supported findings and potential information gaps.
+3. **Analyze Information**  
+   The local rule-based engine uses keyword matching and text comparison to identify relevant passages and potential information gaps.
 
-4. **Generate Investigation Report**  
-   The platform presents findings, potential conflicts, outdated signals, unanswered questions, and verification tasks.
+4. **Generate an Investigation Report**  
+   The platform presents source-supported information, topical overlaps, information gaps, unanswered questions, and verification tasks.
 
 5. **Verify Findings**  
-   Users can inspect original sources and manually verify AI-generated results.
+   Users inspect the original sources and manually verify the collected information.
 
 ## 🛠️ Technology Stack
 
@@ -47,9 +46,8 @@ Golden Spy addresses this challenge through automated source collection and AI-a
 |---|---|
 | Python | Backend programming |
 | Flask | Web application framework |
-| Google Gemini AI | AI-assisted evidence analysis |
-| BeautifulSoup | Webpage content extraction |
 | Requests | HTTP requests and source retrieval |
+| BeautifulSoup | Webpage content extraction |
 | HTML5 | Webpage structure |
 | CSS3 | Styling and responsive design |
 | JavaScript | Frontend interactions |
@@ -83,31 +81,53 @@ golden-spy-ai-investigator/
 └── requirements.txt
 ```
 
-## 🔐 Environment Configuration
+## 💻 Run Locally
 
-The application requires a Google Gemini API key.
+**1. Clone the repository**
 
-Set the following environment variable in your deployment platform:
-
-```env
-GEMINI_API_KEY=your_api_key
+```bash
+git clone https://github.com/A-Irfana-Begam/golden-spy-ai-investigator.git
+cd golden-spy-ai-investigator
 ```
 
-Never commit API keys or secret credentials to the GitHub repository.
+**2. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**3. Start the application**
+
+```bash
+python app.py
+```
+
+**4. Open in your browser**
+
+```text
+http://127.0.0.1:5000
+```
+
+## 🔐 Configuration
+
+Golden Spy does not require an external AI API key or API credentials.
+
+The analysis is performed using a local rule-based engine.
 
 ## ⚠️ Limitations
 
-- Source discovery depends on search service availability.
+- Source discovery depends on the availability of the search service.
 - Some websites may block automated access or prevent content extraction.
-- Analysis quality depends on the relevance and readability of collected sources.
-- AI-generated findings may contain errors or miss important context.
-- Potential conflicts and outdated signals require human verification.
-- Golden Spy does not guarantee that every research question can be answered.
+- Analysis depends on the relevance and readability of collected webpage content.
+- Keyword-based matching cannot fully understand context or meaning.
+- Topical overlap does not prove that sources independently confirm a claim.
+- The current engine does not reliably detect contradictions or determine whether information is outdated.
+- Findings require manual verification using original sources.
 
 ## 🔎 Important Note
 
-Golden Spy is an information investigation and gap detection tool, not a fact-verification authority. Users should always check original sources before relying on generated findings.
+Golden Spy is an information investigation and gap detection tool, not a fact-verification authority or an AI-powered analysis system. Its findings are preliminary signals generated through rule-based text analysis. Always consult original sources before relying on them.
 
 ## 🌟 Project Goal
 
-To make information research more structured by helping users discover not only what available sources say, but also what information is missing, inconsistent, or still needs verification.
+To make information research more structured by helping users identify relevant information, recognize possible gaps, compare source content, and determine what still needs verification.
