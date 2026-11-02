@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Spy | Home</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <meta name="description" content="Golden Spy is a source investigation platform that helps identify information gaps and research signals across webpages.">
+    <title>Golden Spy | Digital Dark Spot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <style>
         .home-hero {
             min-height: 75vh;
@@ -14,18 +16,29 @@
             align-items: center;
             gap: 30px;
         }
+
         .home-hero h1 {
             font: 700 clamp(42px, 7vw, 78px) 'Cinzel', serif;
             line-height: 1.15;
         }
-        .home-hero h1 span { color: var(--light-gold); }
-        .home-hero p { color: #b8ad98; line-height: 1.9; margin: 22px 0; }
+
+        .home-hero h1 span {
+            color: var(--light-gold);
+        }
+
+        .home-hero p {
+            color: #b8ad98;
+            line-height: 1.9;
+            margin: 22px 0;
+        }
+
         .home-shadow {
             height: 350px;
             display: grid;
             place-items: center;
             position: relative;
         }
+
         .shadow-orbit {
             position: absolute;
             width: 270px;
@@ -35,7 +48,9 @@
             box-shadow: 0 0 40px #d6ad5220, inset 0 0 35px #d6ad5215;
             animation: orbit 12s linear infinite;
         }
-        .shadow-orbit::before, .shadow-orbit::after {
+
+        .shadow-orbit::before,
+        .shadow-orbit::after {
             content: "";
             position: absolute;
             width: 9px;
@@ -44,8 +59,17 @@
             background: var(--light-gold);
             box-shadow: 0 0 15px var(--gold);
         }
-        .shadow-orbit::before { top: 25px; left: 35px; }
-        .shadow-orbit::after { bottom: 20px; right: 30px; }
+
+        .shadow-orbit::before {
+            top: 25px;
+            left: 35px;
+        }
+
+        .shadow-orbit::after {
+            bottom: 20px;
+            right: 30px;
+        }
+
         .mystery-shadow {
             width: 145px;
             height: 220px;
@@ -53,6 +77,7 @@
             animation: floatShadow 4s ease-in-out infinite;
             filter: drop-shadow(0 0 22px #d6ad5270);
         }
+
         .mystery-shadow .head {
             position: absolute;
             width: 105px;
@@ -62,6 +87,7 @@
             top: 8px;
             left: 20px;
         }
+
         .mystery-shadow .body {
             position: absolute;
             width: 140px;
@@ -71,6 +97,7 @@
             bottom: 0;
             left: 2px;
         }
+
         .mystery-shadow .hair {
             position: absolute;
             top: 0;
@@ -80,7 +107,13 @@
             background: #030302;
             clip-path: polygon(0 70%, 15% 0, 30% 55%, 48% 0, 62% 55%, 85% 0, 100% 70%);
         }
-        .home-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .home-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         .home-actions a {
             text-decoration: none;
             padding: 14px 23px;
@@ -90,17 +123,26 @@
             letter-spacing: 1px;
             font-size: 12px;
             font-weight: bold;
+            transition: .3s;
         }
+
+        .home-actions a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 18px #d6ad5240;
+        }
+
         .home-actions a.primary {
             background: linear-gradient(100deg, #9d742b, #f4d58b);
             color: #100d06;
         }
+
         .home-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 18px;
             margin: 30px 0 80px;
         }
+
         .home-card {
             padding: 25px;
             min-height: 170px;
@@ -109,32 +151,68 @@
             border-radius: 12px;
             transition: .3s;
         }
-        .home-card:hover { transform: translateY(-8px); border-color: var(--light-gold); }
-        .home-card h3 { color: var(--light-gold); font-family: 'Cinzel', serif; margin-bottom: 12px; }
-        .home-card p { color: #aaa08c; line-height: 1.7; font-size: 13px; }
-        nav { display: flex; gap: 22px; flex-wrap: wrap; }
-        nav a { color: var(--light-gold); text-decoration: none; font-size: 12px; letter-spacing: 1px; }
-        nav a:hover { color: white; }
-        @keyframes orbit { to { transform: rotate(360deg); } }
+
+        .home-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--light-gold);
+        }
+
+        .home-card h3 {
+            color: var(--light-gold);
+            font-family: 'Cinzel', serif;
+            margin-bottom: 12px;
+        }
+
+        .home-card p {
+            color: #aaa08c;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+
+        @keyframes orbit {
+            to { transform: rotate(360deg); }
+        }
+
         @keyframes floatShadow {
-            0%,100% { transform: translateY(0) rotate(-3deg); }
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
             50% { transform: translateY(-15px) rotate(3deg); }
         }
-        @media(max-width:700px) {
-            .home-hero { grid-template-columns: 1fr; text-align: center; padding-top: 50px; }
-            .home-actions { justify-content: center; }
-            .home-shadow { height: 280px; }
-            .home-cards { grid-template-columns: 1fr; }
-            header { gap: 18px; }
-            nav { justify-content: center; }
+
+        @media(max-width: 700px) {
+            .home-hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 50px;
+            }
+
+            .home-actions {
+                justify-content: center;
+            }
+
+            .home-shadow {
+                height: 280px;
+            }
+
+            .home-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            .shadow-orbit,
+            .mystery-shadow {
+                animation: none;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="particles" id="particles"></div>
 
-    <header>
-        <h2>✦ GOLDEN SPY</h2>
+    <header class="navbar">
+        <a href="/" class="logo">✦ GOLDEN SPY</a>
+
         <nav>
             <a href="/">HOME</a>
             <a href="/investigate">INVESTIGATE</a>
@@ -146,21 +224,33 @@
     <main>
         <section class="home-hero">
             <div>
-                <p class="eyebrow">CLASSIFIED INTELLIGENCE PLATFORM</p>
-                <h1>Look Beyond<br>The <span>Shadows.</span></h1>
+                <p class="eyebrow">DIGITAL DARK SPOT</p>
+
+                <h1>
+                    Look Beyond<br>
+                    The <span>Shadows.</span>
+                </h1>
+
                 <p>
                     Information is everywhere. The truth is not always visible.
-                    Investigate sources, uncover information gaps and discover
-                    details that deserve verification.
+                    Examine multiple sources, identify information gaps and
+                    discover details that deserve further verification.
                 </p>
+
                 <div class="home-actions">
-                    <a class="primary" href="/investigate">START INVESTIGATION ↗</a>
-                    <a href="/about">EXPLORE PROJECT</a>
+                    <a class="primary" href="/investigate">
+                        START INVESTIGATION ↗
+                    </a>
+
+                    <a href="/about">
+                        EXPLORE PROJECT
+                    </a>
                 </div>
             </div>
 
-            <div class="home-shadow">
+            <div class="home-shadow" aria-hidden="true">
                 <div class="shadow-orbit"></div>
+
                 <div class="mystery-shadow">
                     <div class="hair"></div>
                     <div class="head"></div>
@@ -170,23 +260,37 @@
         </section>
 
         <p class="eyebrow">YOUR INTELLIGENCE NETWORK</p>
+
         <section class="home-cards">
             <div class="home-card">
                 <h3>01 / INVESTIGATE</h3>
-                <p>Examine multiple web sources using your research question.</p>
+                <p>
+                    Examine multiple webpages using a focused research question.
+                </p>
             </div>
+
             <div class="home-card">
-                <h3>02 / DISCOVER</h3>
-                <p>Identify potential gaps, outdated signals and conflicting details.</p>
+                <h3>02 / IDENTIFY GAPS</h3>
+                <p>
+                    Find missing relevant information and compare
+                    topic coverage across sources.
+                </p>
             </div>
+
             <div class="home-card">
                 <h3>03 / VERIFY</h3>
-                <p>Review evidence and follow a verification checklist.</p>
+                <p>
+                    Review source material and follow a checklist
+                    before treating findings as facts.
+                </p>
             </div>
         </section>
     </main>
 
-    <footer>GOLDEN SPY © 2026 | THINK BEYOND THE SHADOWS</footer>
-    <script src="/static/js/script.js"></script>
+    <footer>
+        GOLDEN SPY © 2026 | THINK BEYOND THE SHADOWS
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </body>
 </html>
