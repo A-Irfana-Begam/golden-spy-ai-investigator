@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Spy | About</title>
     <link rel="stylesheet" href="/static/css/style.css">
+
     <style>
         .about-hero {
             min-height: 65vh;
@@ -15,18 +15,26 @@
             gap: 30px;
             padding: 55px 0;
         }
+
         .about-hero h1 {
             font: 700 clamp(38px, 6vw, 65px) 'Cinzel', serif;
             color: var(--light-gold);
             line-height: 1.2;
         }
-        .about-hero p { color: #b8ad98; line-height: 1.9; margin-top: 20px; }
+
+        .about-hero p {
+            color: #b8ad98;
+            line-height: 1.9;
+            margin-top: 20px;
+        }
+
         .about-visual {
             height: 300px;
             display: grid;
             place-items: center;
             position: relative;
         }
+
         .classified-stamp {
             width: 220px;
             height: 220px;
@@ -37,13 +45,16 @@
             transform: rotate(-12deg);
             box-shadow: 0 0 35px #d6ad5220;
             animation: stampPulse 4s ease-in-out infinite;
+            position: relative;
         }
+
         .classified-stamp span {
             font: 700 24px 'Cinzel', serif;
             color: var(--light-gold);
             letter-spacing: 4px;
             text-shadow: 0 0 15px #d6ad5280;
         }
+
         .classified-stamp::before {
             content: "";
             position: absolute;
@@ -51,12 +62,17 @@
             border: 1px dashed #d6ad5270;
             border-radius: 50%;
         }
-        .about-section { margin: 35px 0 65px; }
+
+        .about-section {
+            margin: 35px 0 65px;
+        }
+
         .about-section h2 {
             font: 600 25px 'Cinzel', serif;
             color: var(--light-gold);
             margin-bottom: 20px;
         }
+
         .about-panel {
             background: linear-gradient(120deg, #1b170e, #0b0a07);
             border: 1px solid #80642e80;
@@ -65,21 +81,44 @@
             color: #b8ad98;
             line-height: 1.9;
         }
+
         .steps {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 18px;
         }
+
         .step {
             padding: 23px;
             background: #15130e;
             border-bottom: 2px solid var(--gold);
             border-radius: 10px;
         }
-        .step span { color: var(--gold); font-size: 12px; letter-spacing: 3px; }
-        .step h3 { color: var(--light-gold); margin: 13px 0; font-family: 'Cinzel', serif; }
-        .step p { color: #aaa08c; font-size: 13px; line-height: 1.8; }
-        .tech-list { display: flex; flex-wrap: wrap; gap: 12px; }
+
+        .step span {
+            color: var(--gold);
+            font-size: 12px;
+            letter-spacing: 3px;
+        }
+
+        .step h3 {
+            color: var(--light-gold);
+            margin: 13px 0;
+            font-family: 'Cinzel', serif;
+        }
+
+        .step p {
+            color: #aaa08c;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
         .tech-list span {
             border: 1px solid #80642e;
             border-radius: 20px;
@@ -87,26 +126,64 @@
             color: var(--light-gold);
             font-size: 12px;
         }
-        nav { display: flex; gap: 22px; flex-wrap: wrap; }
-        nav a { color: var(--light-gold); text-decoration: none; font-size: 12px; letter-spacing: 1px; }
-        @keyframes stampPulse {
-            0%,100% { transform: rotate(-12deg) scale(1); }
-            50% { transform: rotate(-5deg) scale(1.05); }
+
+        nav {
+            display: flex;
+            gap: 22px;
+            flex-wrap: wrap;
         }
+
+        nav a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        nav a:hover {
+            color: white;
+        }
+
+        @keyframes stampPulse {
+            0%, 100% {
+                transform: rotate(-12deg) scale(1);
+            }
+            50% {
+                transform: rotate(-5deg) scale(1.05);
+            }
+        }
+
         @media(max-width:700px) {
-            .about-hero { grid-template-columns: 1fr; text-align: center; }
-            .about-visual { height: 240px; }
-            .steps { grid-template-columns: 1fr; }
-            header { gap: 15px; }
-            nav { justify-content: center; }
+            .about-hero {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .about-visual {
+                height: 240px;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                gap: 15px;
+            }
+
+            nav {
+                justify-content: center;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="particles" id="particles"></div>
 
     <header>
         <h2>✦ GOLDEN SPY</h2>
+
         <nav>
             <a href="/">HOME</a>
             <a href="/investigate">INVESTIGATE</a>
@@ -119,13 +196,17 @@
         <section class="about-hero">
             <div>
                 <p class="eyebrow">PROJECT DOSSIER / 004</p>
+
                 <h1>Behind The<br>Intelligence.</h1>
+
                 <p>
-                    Golden Spy is an information gap detection platform.
-                    It examines multiple web sources to identify potential
-                    missing details, conflicting claims and outdated signals.
+                    Golden Spy is an AI-assisted information gap detection
+                    platform. It examines multiple web sources to identify
+                    potential missing details, conflicting claims and
+                    outdated signals.
                 </p>
             </div>
+
             <div class="about-visual">
                 <div class="classified-stamp">
                     <span>CLASSIFIED</span>
@@ -135,58 +216,81 @@
 
         <section class="about-section">
             <h2>Mission Brief</h2>
+
             <div class="about-panel">
                 Digital information can be incomplete, inconsistent or outdated.
-                Golden Spy helps researchers examine available source material,
-                discover potential information gaps and prepare a verification checklist.
-                Its findings are signals for further review, not proof of truth.
+                Golden Spy uses AI-assisted analysis to examine accessible source
+                material, identify potential information gaps and prepare a
+                verification checklist. Its findings are signals for further
+                review, not proof of truth.
             </div>
         </section>
 
         <section class="about-section">
             <h2>How It Works</h2>
+
             <div class="steps">
                 <div class="step">
                     <span>01 / COLLECT</span>
                     <h3>Source Collection</h3>
-                    <p>Submit a research question and relevant source URLs.</p>
+                    <p>
+                        Submit a research question and relevant source URLs.
+                        The platform can also discover sources automatically.
+                    </p>
                 </div>
+
                 <div class="step">
                     <span>02 / ANALYZE</span>
-                    <h3>Signal Detection</h3>
-                    <p>Review extracted text for matching statements and possible outdated signals.</p>
+                    <h3>AI Signal Analysis</h3>
+                    <p>
+                        Gemini AI analyzes extracted webpage content to identify
+                        supported claims, information gaps, possible conflicts
+                        and outdated signals.
+                    </p>
                 </div>
+
                 <div class="step">
                     <span>03 / VERIFY</span>
                     <h3>Evidence Review</h3>
-                    <p>Examine source references and follow the verification checklist.</p>
+                    <p>
+                        Examine source references, review unanswered questions
+                        and follow the verification checklist.
+                    </p>
                 </div>
             </div>
         </section>
 
         <section class="about-section">
             <h2>Technology Stack</h2>
+
             <div class="tech-list">
                 <span>Python</span>
                 <span>Flask</span>
+                <span>Google Gemini AI</span>
                 <span>HTML5</span>
                 <span>CSS3</span>
                 <span>JavaScript</span>
                 <span>BeautifulSoup</span>
                 <span>Requests</span>
+                <span>Vercel</span>
             </div>
         </section>
 
         <section class="about-section">
             <div class="about-panel">
-                <strong>IMPORTANT:</strong> Golden Spy currently uses a local,
-                rule-based analysis engine. It does not use an external AI model
-                or paid API. Results require human verification.
+                <strong>IMPORTANT:</strong>
+                Golden Spy uses Gemini AI to analyze content extracted from
+                accessible webpages. Source availability and extraction quality
+                may vary. AI-generated findings can contain errors and must be
+                checked against the original sources before relying on them.
             </div>
         </section>
     </main>
 
-    <footer>GOLDEN SPY © 2026 | END OF DOSSIER</footer>
+    <footer>
+        GOLDEN SPY © 2026 | END OF DOSSIER
+    </footer>
+
     <script src="/static/js/script.js"></script>
 </body>
 </html>
