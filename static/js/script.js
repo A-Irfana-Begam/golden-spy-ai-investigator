@@ -16,6 +16,7 @@ const urlList = document.getElementById("url-list");
 const addSourceButton = document.getElementById("add-source");
 const investigateButton = document.getElementById("investigate");
 
+
 if (addSourceButton && urlList) {
     addSourceButton.onclick = () => {
         if (urlList.querySelectorAll(".source-url").length >= 8) {
@@ -72,7 +73,10 @@ function createCard(title, items) {
                 ];
 
                 fields.forEach(([key, label]) => {
-                    if (typeof item[key] === "string" && item[key].trim()) {
+                    if (
+                        typeof item[key] === "string" &&
+                        item[key].trim()
+                    ) {
                         details.push(label + item[key]);
                     }
                 });
@@ -80,9 +84,9 @@ function createCard(title, items) {
                 if (Array.isArray(item.sources)) {
                     details.push(
                         "Supporting sources: " +
-                        item.sources.filter(
-                            source => typeof source === "string"
-                        ).join(", ")
+                        item.sources
+                            .filter(source => typeof source === "string")
+                            .join(", ")
                     );
                 }
 
@@ -124,6 +128,23 @@ function validateSourceUrls(urls) {
 }
 
 
+function createAnswerCard(answer) {
+    const card = document.createElement("div");
+    card.className = "report-card direct-answer";
+
+    const heading = document.createElement("h3");
+    heading.textContent = "DIRECT ANSWER";
+
+    const content = document.createElement("p");
+    content.textContent = answer;
+
+    card.appendChild(heading);
+    card.appendChild(content);
+
+    return card;
+}
+
+
 if (investigateButton) {
     investigateButton.onclick = async () => {
         const questionInput = document.getElementById("question");
@@ -148,6 +169,11 @@ if (investigateButton) {
             return;
         }
 
+        if (question.length > 1000) {
+            status.textContent = "Question must be under 1000 characters.";
+            return;
+        }
+
         if (urls.length > 8) {
             status.textContent = "Maximum 8 sources allowed.";
             return;
@@ -168,9 +194,10 @@ if (investigateButton) {
 
         const controller = new AbortController();
 
+        // Allow more time for the backend investigation.
         const timeout = setTimeout(() => {
             controller.abort();
-        }, 120000);
+        }, 180000);
 
         try {
             const response = await fetch("/api/investigate", {
@@ -203,11 +230,19 @@ if (investigateButton) {
 
             if (!data.analysis || typeof data.analysis !== "object") {
                 throw new Error(
-                    "Investigation report is incomplete. Please try again."
+                    "Investigation report is incomplete."
                 );
             }
 
             const analysis = data.analysis;
+
+            // Show the direct answer first.
+            report.appendChild(
+                createAnswerCard(
+                    analysis.direct_answer ||
+                    "The available sources do not provide a reliable answer."
+                )
+            );
 
             const sections = [
                 ["SUMMARY", analysis.summary],
@@ -266,7 +301,7 @@ if (investigateButton) {
         } catch (error) {
             if (error.name === "AbortError") {
                 status.textContent =
-                    "⚠ Request timed out. Please try again.";
+                    "⚠ Investigation timed out. Please try again.";
             } else {
                 status.textContent =
                     "⚠ " + (error.message || "Investigation failed.");
