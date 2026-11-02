@@ -55,6 +55,12 @@ def run_investigation():
 
         question = question.strip()
 
+        if len(question) > 1000:
+            return jsonify({
+                "success": False,
+                "error": "Research question is too long. Maximum 1000 characters."
+            }), 400
+
         if not isinstance(user_urls, list):
             return jsonify({
                 "success": False,
@@ -75,20 +81,17 @@ def run_investigation():
 
         discovered_urls = []
 
-        try:
-            remaining = 8 - len(user_urls)
-
-            if remaining > 0:
+        if len(user_urls) < 8:
+            try:
                 discovered_urls = discover_sources(
                     question,
-                    limit=remaining
+                    limit=8 - len(user_urls)
                 ) or []
-
-        except Exception:
-            app.logger.warning(
-                "Automatic source discovery failed.",
-                exc_info=True
-            )
+            except Exception:
+                app.logger.warning(
+                    "Automatic source discovery failed.",
+                    exc_info=True
+                )
 
         combined_urls = list(dict.fromkeys(
             user_urls + discovered_urls
@@ -97,10 +100,7 @@ def run_investigation():
         if not combined_urls:
             return jsonify({
                 "success": False,
-                "error": (
-                    "No sources found. Please try again "
-                    "or provide webpage URLs."
-                )
+                "error": "No sources found. Try again or provide webpage URLs."
             }), 400
 
         sources = fetch_sources(combined_urls)
