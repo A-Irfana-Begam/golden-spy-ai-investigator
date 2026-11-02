@@ -3,12 +3,12 @@ const particles = document.getElementById("particles");
 
 if (particles) {
     for (let i = 0; i < 55; i++) {
-        const p = document.createElement("span");
-        p.className = "particle";
-        p.style.left = Math.random() * 100 + "%";
-        p.style.animationDelay = Math.random() * 8 + "s";
-        p.style.animationDuration = 5 + Math.random() * 8 + "s";
-        particles.appendChild(p);
+        const particle = document.createElement("span");
+        particle.className = "particle";
+        particle.style.left = Math.random() * 100 + "%";
+        particle.style.animationDelay = Math.random() * 8 + "s";
+        particle.style.animationDuration = 5 + Math.random() * 8 + "s";
+        particles.appendChild(particle);
     }
 }
 
@@ -18,7 +18,7 @@ const investigateButton = document.getElementById("investigate");
 
 
 if (addSourceButton && urlList) {
-    addSourceButton.onclick = () => {
+    addSourceButton.addEventListener("click", () => {
         if (urlList.querySelectorAll(".source-url").length >= 8) {
             alert("Maximum 8 sources allowed.");
             return;
@@ -31,7 +31,7 @@ if (addSourceButton && urlList) {
         input.maxLength = 2048;
 
         urlList.appendChild(input);
-    };
+    });
 }
 
 
@@ -83,7 +83,7 @@ function createCard(title, items) {
 
                 if (Array.isArray(item.sources)) {
                     details.push(
-                        "Supporting sources: " +
+                        "Sources: " +
                         item.sources
                             .filter(source => typeof source === "string")
                             .join(", ")
@@ -133,7 +133,7 @@ function createAnswerCard(answer) {
     card.className = "report-card direct-answer";
 
     const heading = document.createElement("h3");
-    heading.textContent = "DIRECT ANSWER";
+    heading.textContent = "INVESTIGATION RESULT";
 
     const content = document.createElement("p");
     content.textContent = answer;
@@ -146,7 +146,7 @@ function createAnswerCard(answer) {
 
 
 if (investigateButton) {
-    investigateButton.onclick = async () => {
+    investigateButton.addEventListener("click", async () => {
         const questionInput = document.getElementById("question");
         const status = document.getElementById("status");
         const results = document.getElementById("results");
@@ -170,7 +170,8 @@ if (investigateButton) {
         }
 
         if (question.length > 1000) {
-            status.textContent = "Question must be under 1000 characters.";
+            status.textContent =
+                "Question must not exceed 1000 characters.";
             return;
         }
 
@@ -186,18 +187,13 @@ if (investigateButton) {
         }
 
         investigateButton.disabled = true;
-        status.textContent =
-            "⏳ Discovering sources and investigating...";
+        status.textContent = "Investigating sources...";
 
         results.hidden = true;
         report.replaceChildren();
 
         const controller = new AbortController();
-
-        // Allow more time for the backend investigation.
-        const timeout = setTimeout(() => {
-            controller.abort();
-        }, 180000);
+        const timeout = setTimeout(() => controller.abort(), 120000);
 
         try {
             const response = await fetch("/api/investigate", {
@@ -217,54 +213,35 @@ if (investigateButton) {
             try {
                 data = await response.json();
             } catch {
-                throw new Error(
-                    "Server returned an invalid response. Please try again."
-                );
+                throw new Error("Server returned an invalid response.");
             }
 
             if (!response.ok || !data.success) {
-                throw new Error(
-                    data.error || "Investigation failed."
-                );
+                throw new Error(data.error || "Investigation failed.");
             }
 
             if (!data.analysis || typeof data.analysis !== "object") {
-                throw new Error(
-                    "Investigation report is incomplete."
-                );
+                throw new Error("Investigation report is incomplete.");
             }
 
             const analysis = data.analysis;
 
-            // Show the direct answer first.
             report.appendChild(
                 createAnswerCard(
                     analysis.direct_answer ||
-                    "The available sources do not provide a reliable answer."
+                    "The available sources do not provide enough information."
                 )
             );
 
             const sections = [
                 ["SUMMARY", analysis.summary],
-                [
-                    "SOURCE-SUPPORTED INFORMATION",
-                    analysis.verified_information
-                ],
-                [
-                    "CROSS-SOURCE CORROBORATION",
-                    analysis.cross_source_corroboration
-                ],
+                ["SOURCE-SUPPORTED INFORMATION", analysis.verified_information],
+                ["CROSS-SOURCE TOPICAL OVERLAP", analysis.cross_source_corroboration],
                 ["INFORMATION GAPS", analysis.information_gaps],
                 ["POTENTIAL CONFLICTS", analysis.potential_conflicts],
                 ["OUTDATED SIGNALS", analysis.outdated_signals],
-                [
-                    "UNANSWERED QUESTIONS",
-                    analysis.unanswered_questions
-                ],
-                [
-                    "VERIFICATION CHECKLIST",
-                    analysis.verification_checklist
-                ]
+                ["UNANSWERED QUESTIONS", analysis.unanswered_questions],
+                ["VERIFICATION CHECKLIST", analysis.verification_checklist]
             ];
 
             sections.forEach(([title, items]) => {
@@ -285,13 +262,13 @@ if (investigateButton) {
 
             report.appendChild(
                 createCard("ANALYSIS MODE", [
-                    data.analysis_mode || "Gemini AI",
+                    data.analysis_mode || "Local Rule-Based Analysis",
                     data.disclaimer || ""
                 ])
             );
 
             results.hidden = false;
-            status.textContent = "✓ Investigation completed.";
+            status.textContent = "Investigation completed.";
 
             results.scrollIntoView({
                 behavior: "smooth",
@@ -299,17 +276,14 @@ if (investigateButton) {
             });
 
         } catch (error) {
-            if (error.name === "AbortError") {
-                status.textContent =
-                    "⚠ Investigation timed out. Please try again.";
-            } else {
-                status.textContent =
-                    "⚠ " + (error.message || "Investigation failed.");
-            }
+            status.textContent = error.name === "AbortError"
+                ? "Investigation timed out. Please try again."
+                : "Investigation failed: " +
+                  (error.message || "Please try again.");
 
         } finally {
             clearTimeout(timeout);
             investigateButton.disabled = false;
         }
-    };
+    });
 }
