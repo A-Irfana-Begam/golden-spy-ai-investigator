@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
@@ -30,7 +31,7 @@ body {
 
 /* PARTICLES */
 
-.particles {
+#particles {
     position: fixed;
     inset: 0;
     pointer-events: none;
@@ -56,9 +57,9 @@ body {
     }
 }
 
-/* HEADER AND NAVBAR */
+/* NAVBAR */
 
-header {
+.navbar {
     position: relative;
     z-index: 10;
     padding: 25px 8%;
@@ -71,15 +72,16 @@ header {
     background: #080806;
 }
 
-header h2 {
+.logo {
     font-family: 'Cinzel', serif;
     color: var(--light-gold);
     letter-spacing: 4px;
+    font-weight: 800;
+    text-decoration: none;
     text-shadow: 0 0 15px #d6ad5270;
-    white-space: nowrap;
 }
 
-header nav {
+.navbar nav {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -87,17 +89,16 @@ header nav {
     gap: 25px;
 }
 
-header nav a {
+.navbar nav a {
     color: var(--gold);
     text-decoration: none;
-    font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     transition: .3s ease;
 }
 
-header nav a:hover {
+.navbar nav a:hover {
     color: var(--light-gold);
     text-shadow: 0 0 12px var(--gold);
 }
@@ -112,82 +113,54 @@ main {
     margin: auto;
 }
 
-/* HERO */
+/* INVESTIGATION PAGE */
 
-.hero {
+.investigate-container {
+    padding-top: 55px;
+}
+
+.page-heading {
     text-align: center;
-    padding: 85px 15px 55px;
-}
-
-.shadow {
-    font-size: 95px;
-    color: #050505;
-    filter: drop-shadow(0 0 25px #d6ad52);
-    animation: spy 4s ease-in-out infinite;
-}
-
-@keyframes spy {
-    0%, 100% {
-        transform: translateY(0) rotate(-5deg);
-    }
-
-    50% {
-        transform: translateY(-18px) rotate(5deg);
-    }
+    padding: 25px 15px 40px;
 }
 
 .eyebrow {
     color: var(--gold);
     font-size: 11px;
     letter-spacing: 5px;
-    margin: 20px 0;
+    margin: 15px 0;
 }
 
-.hero h1 {
+.page-heading h1 {
     font-family: 'Cinzel', serif;
-    font-size: clamp(35px, 6vw, 65px);
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--light-gold);
     margin-bottom: 18px;
 }
 
-.hero h1 span {
-    color: var(--light-gold);
-    text-shadow: 0 0 25px #d6ad5280;
-}
-
-.hero > p:last-child {
+.page-heading > p:last-child {
     color: var(--muted);
     line-height: 1.8;
+    max-width: 680px;
+    margin: auto;
 }
 
-/* INVESTIGATION FORM */
+/* FORM */
 
-.investigation {
+.investigation-panel {
     background: linear-gradient(145deg, #1c190f, #0e0d09);
     border: 1px solid #b38b3560;
     border-radius: 18px;
     padding: 35px;
-    margin: 25px auto 60px;
+    margin: 20px auto 60px;
     box-shadow: 0 0 40px #d6ad5210;
-    transition: .3s;
 }
 
-.investigation:hover {
-    border-color: var(--gold);
-    box-shadow: 0 0 35px #d6ad5220;
-}
-
-.investigation h2,
-#results h2 {
-    font-family: 'Cinzel', serif;
-    color: var(--light-gold);
-    margin-bottom: 28px;
-}
-
-label {
+.investigation-panel label {
     display: block;
     color: var(--gold);
     font-size: 13px;
-    margin: 22px 0 10px;
+    margin: 18px 0 10px;
 }
 
 textarea,
@@ -212,6 +185,25 @@ textarea:focus,
 input:focus {
     border-color: var(--light-gold);
     box-shadow: 0 0 12px #d6ad5230;
+}
+
+.source-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.source-heading label {
+    margin-bottom: 10px;
+}
+
+.input-hint {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    margin-top: 5px;
 }
 
 /* BUTTONS */
@@ -241,7 +233,7 @@ button:disabled {
     cursor: not-allowed;
 }
 
-#investigate {
+.primary-button {
     display: block;
     width: 100%;
     padding: 17px;
@@ -251,9 +243,9 @@ button:disabled {
     font-size: 14px;
 }
 
-#investigate:disabled {
-    opacity: .5;
-    cursor: wait;
+.secondary-button {
+    font-size: 11px;
+    padding: 10px 15px;
 }
 
 #status {
@@ -263,14 +255,31 @@ button:disabled {
     line-height: 1.7;
 }
 
-/* REPORT */
+/* RESULTS */
 
-#results {
+.results-section {
     margin-bottom: 60px;
 }
 
-#results[hidden] {
+.results-section[hidden] {
     display: none;
+}
+
+.results-heading {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.results-heading h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--light-gold);
+    font-size: 30px;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
 }
 
 .report-card {
@@ -278,9 +287,9 @@ button:disabled {
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 22px;
-    margin: 15px 0;
     transition: .3s;
     overflow-wrap: anywhere;
+    min-width: 0;
 }
 
 .report-card:hover {
@@ -291,7 +300,7 @@ button:disabled {
     color: var(--light-gold);
     margin-bottom: 15px;
     font-family: 'Cinzel', serif;
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .report-card p,
@@ -299,6 +308,7 @@ button:disabled {
     color: #c7bdab;
     line-height: 1.8;
     overflow-wrap: anywhere;
+    font-size: 13px;
 }
 
 .report-card ul {
@@ -317,6 +327,7 @@ button:disabled {
 /* DIRECT ANSWER */
 
 .direct-answer {
+    grid-column: 1 / -1;
     border-color: var(--gold);
     background: linear-gradient(145deg, #211b0e, #15130e);
     box-shadow: 0 0 25px #d6ad5215;
@@ -341,7 +352,8 @@ footer {
     padding: 25px;
     color: #927b4c;
     font-size: 11px;
-    letter-spacing: 3px;
+    line-height: 1.8;
+    letter-spacing: 2px;
     border-top: 1px solid #b38b3530;
 }
 
@@ -358,44 +370,48 @@ textarea:focus-visible {
 /* RESPONSIVE */
 
 @media (max-width: 700px) {
-    header {
+    .navbar {
         padding: 20px 5%;
         flex-direction: column;
         justify-content: center;
         gap: 18px;
     }
 
-    header nav {
+    .navbar nav {
         gap: 15px;
     }
 
-    header nav a {
+    .navbar nav a {
         font-size: 11px;
     }
 
-    .hero {
-        padding-top: 55px;
+    .investigate-container {
+        padding-top: 30px;
     }
 
-    .investigation {
+    .investigation-panel {
         padding: 22px;
     }
 
-    .status {
-        font-size: 9px;
+    .report-grid {
+        grid-template-columns: 1fr;
     }
 
     .report-card {
         padding: 18px;
     }
+
+    footer {
+        font-size: 9px;
+    }
 }
 
 @media (max-width: 400px) {
-    header nav {
+    .navbar nav {
         gap: 12px;
     }
 
-    header nav a {
+    .navbar nav a {
         font-size: 10px;
         letter-spacing: 1px;
     }
