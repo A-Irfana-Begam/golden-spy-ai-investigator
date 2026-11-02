@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn about Golden Spy, its local rule-based source analysis engine, workflow and technology stack.">
     <title>Golden Spy | About</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
         .about-hero {
@@ -127,23 +129,6 @@
             font-size: 12px;
         }
 
-        nav {
-            display: flex;
-            gap: 22px;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            color: var(--light-gold);
-            text-decoration: none;
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
-
-        nav a:hover {
-            color: white;
-        }
-
         @keyframes stampPulse {
             0%, 100% {
                 transform: rotate(-12deg) scale(1);
@@ -153,7 +138,7 @@
             }
         }
 
-        @media(max-width:700px) {
+        @media(max-width: 700px) {
             .about-hero {
                 grid-template-columns: 1fr;
                 text-align: center;
@@ -166,13 +151,11 @@
             .steps {
                 grid-template-columns: 1fr;
             }
+        }
 
-            header {
-                gap: 15px;
-            }
-
-            nav {
-                justify-content: center;
+        @media(prefers-reduced-motion: reduce) {
+            .classified-stamp {
+                animation: none;
             }
         }
     </style>
@@ -181,8 +164,8 @@
 <body>
     <div class="particles" id="particles"></div>
 
-    <header>
-        <h2>✦ GOLDEN SPY</h2>
+    <header class="navbar">
+        <a href="/" class="logo">✦ GOLDEN SPY</a>
 
         <nav>
             <a href="/">HOME</a>
@@ -200,14 +183,14 @@
                 <h1>Behind The<br>Intelligence.</h1>
 
                 <p>
-                    Golden Spy is an AI-assisted information gap detection
-                    platform. It examines multiple web sources to identify
-                    potential missing details, conflicting claims and
-                    outdated signals.
+                    Golden Spy is an information gap detection platform.
+                    It examines accessible webpage content using a local
+                    keyword-based analysis engine to identify relevant
+                    information, missing details and research signals.
                 </p>
             </div>
 
-            <div class="about-visual">
+            <div class="about-visual" aria-hidden="true">
                 <div class="classified-stamp">
                     <span>CLASSIFIED</span>
                 </div>
@@ -219,10 +202,9 @@
 
             <div class="about-panel">
                 Digital information can be incomplete, inconsistent or outdated.
-                Golden Spy uses AI-assisted analysis to examine accessible source
-                material, identify potential information gaps and prepare a
-                verification checklist. Its findings are signals for further
-                review, not proof of truth.
+                Golden Spy helps researchers examine multiple sources, identify
+                potential information gaps and prepare a verification checklist.
+                Its findings are preliminary signals, not proof of truth.
             </div>
         </section>
 
@@ -235,17 +217,17 @@
                     <h3>Source Collection</h3>
                     <p>
                         Submit a research question and relevant source URLs.
-                        The platform can also discover sources automatically.
+                        The platform can also attempt automatic source discovery.
                     </p>
                 </div>
 
                 <div class="step">
                     <span>02 / ANALYZE</span>
-                    <h3>AI Signal Analysis</h3>
+                    <h3>Local Signal Analysis</h3>
                     <p>
-                        Gemini AI analyzes extracted webpage content to identify
-                        supported claims, information gaps, possible conflicts
-                        and outdated signals.
+                        A keyword-based rule engine examines extracted webpage
+                        content, identifies relevant statements and compares
+                        topical overlap across sources.
                     </p>
                 </div>
 
@@ -253,8 +235,8 @@
                     <span>03 / VERIFY</span>
                     <h3>Evidence Review</h3>
                     <p>
-                        Examine source references, review unanswered questions
-                        and follow the verification checklist.
+                        Review source references, identify unanswered questions
+                        and follow the verification checklist using original sources.
                     </p>
                 </div>
             </div>
@@ -266,7 +248,6 @@
             <div class="tech-list">
                 <span>Python</span>
                 <span>Flask</span>
-                <span>Google Gemini AI</span>
                 <span>HTML5</span>
                 <span>CSS3</span>
                 <span>JavaScript</span>
@@ -279,10 +260,11 @@
         <section class="about-section">
             <div class="about-panel">
                 <strong>IMPORTANT:</strong>
-                Golden Spy uses Gemini AI to analyze content extracted from
-                accessible webpages. Source availability and extraction quality
-                may vary. AI-generated findings can contain errors and must be
-                checked against the original sources before relying on them.
+                Golden Spy currently uses local keyword-based analysis.
+                It does not use an external AI API. Its analysis cannot reliably
+                establish factual truth, detect every contradiction or determine
+                whether information is outdated. Findings must be checked
+                against original sources before relying on them.
             </div>
         </section>
     </main>
@@ -291,6 +273,6 @@
         GOLDEN SPY © 2026 | END OF DOSSIER
     </footer>
 
-    <script src="/static/js/script.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </body>
 </html>
