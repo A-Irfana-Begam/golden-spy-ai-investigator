@@ -2,23 +2,23 @@
 import ipaddress
 import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse, urljoin, parse_qs, unquote
+from urllib.parse import urlparse, parse_qs, unquote
 
 import requests
 from bs4 import BeautifulSoup
 
 
+MAX_SOURCES = 8
 MAX_CONTENT_SIZE = 500_000
 MAX_TEXT_LENGTH = 6000
-MAX_SOURCES = 8
 MAX_WORKERS = 4
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; GoldenSpy/1.0)"
 }
 
-SEARCH_TIMEOUT = (3, 7)
-FETCH_TIMEOUT = (3, 8)
+SEARCH_TIMEOUT = (5, 10)
+FETCH_TIMEOUT = (5, 12)
 
 
 def validate_url(url):
@@ -55,13 +55,14 @@ def validate_url(url):
     except socket.gaierror:
         raise ValueError("Unable to resolve website hostname.")
 
+    if not addresses:
+        raise ValueError("Unable to resolve website hostname.")
+
     for address in addresses:
         ip = ipaddress.ip_address(address[4][0])
 
         if not ip.is_global:
-            raise ValueError(
-                "Private or restricted IP addresses are not allowed."
-            )
+            raise ValueError("Private IP addresses are not allowed.")
 
     return parsed
 
@@ -97,12 +98,10 @@ def discover_sources(question, limit=5):
                 continue
 
             parsed_link = urlparse(href)
+            query = parse_qs(parsed_link.query)
 
-            if "uddg" in parse_qs(parsed_link.query):
-                href = parse_qs(parsed_link.query)["uddg"][0]
-                href = unquote(href)
-
-            href = urljoin(search_url, href)
+            if "uddg" in query:
+                href = unquote(query["uddg"][0])
 
             try:
                 parsed = validate_url(href)
@@ -168,7 +167,7 @@ def fetch_one_source(url):
     }
 
     try:
-        validate_url(url)
+        parsed = validate_url(url)
 
         with requests.get(
             url,
@@ -201,7 +200,9 @@ def fetch_one_source(url):
                 try:
                     if int(content_length) > MAX_CONTENT_SIZE:
                         raise ValueError("Webpage is too large.")
-                except (ValueError, TypeError):
+                except ValueError as error:
+                    if str(error) == "Webpage is too large.":
+                        raise
                     raise ValueError("Invalid webpage size.")
 
             chunks = []
@@ -250,9 +251,6 @@ def fetch_sources(urls):
         for url in urls[:MAX_SOURCES]
         if isinstance(url, str) and url.strip()
     ))
-
-    if not unique_urls:
-        return []
 
     results = {}
 
